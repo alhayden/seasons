@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', setup); // called once page is loaded
 
 const scroll_step = 16; // amount of pixels to move each scroll wheel tick
-
+let doc_width; 
 let box; // div which holds the whole scrolling calendar
 
 // setup ----------
@@ -11,6 +11,10 @@ function setup() {
     // get the "box" (div which contains the calendar)
     box = document.getElementById("calendar-box");
     console.log(box);
+    
+    // get window width
+    doc_width = document.innerWidth || document.body.clientWidth;
+
     // set up the event listeners (for user input)
     addEventListeners();
 }
@@ -22,7 +26,9 @@ function scrollChildrenSideways(container, amount) {
             continue;  // ignore elements that were initialized without a position
         }
         // move the object
-        i.style.left = (parseInt(i.style.left) + amount) + "px";
+        let currX = parseInt(i.style.left);
+        currX += amount;
+        i.style.left = (currX) + "px";
     }
 }
 
