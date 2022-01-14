@@ -1,27 +1,40 @@
 "use strict";
-document.addEventListener('DOMContentLoaded', setup);
+document.addEventListener('DOMContentLoaded', setup); // called once page is loaded
 
-let box;
+const scroll_step = 16; // amount of pixels to move each scroll wheel tick
+
+let box; // div which holds the whole scrolling calendar
 
 // setup ----------
 
 function setup() {
+    // get the "box" (div which contains the calendar)
     box = document.getElementById("calendar-box");
     console.log(box);
+    // set up the event listeners (for user input)
     addEventListeners();
 }
 
-function scrollSideways(amount) {
-    for (let i of box.children) {
-        i.style.left = (i.style.left + amount) + "px";
+// translate all of the children of the given container sideways by the given amount
+function scrollChildrenSideways(container, amount) {
+    for (let i of container.children) { // loop through children
+        if (i.style.left == '') {   
+            continue;  // ignore elements that were initialized without a position
+        }
+        // move the object
+        i.style.left = (parseInt(i.style.left) + amount) + "px";
     }
 }
 
 
 function addEventListeners() {
-
+    
+    // add listener for mouse scroll wheel use
     document.getElementById("body").addEventListener("wheel", e => {
-        console.log("e");
-        scrollSideways(5);
+        if (e.deltaY < 0) {
+            scrollChildrenSideways(box, scroll_step);
+        } else {
+            scrollChildrenSideways(box, -1 * scroll_step);
+        }
     });
 }
