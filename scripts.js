@@ -75,13 +75,15 @@ function createMonthLabel(x, label) {
 
 function createSeasonObject(x, y) {
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
-    let naming_box = createClassedElementAt(x, y, "it works?", ['seasoninput'], 'input');
-    naming_box.focus();
+    let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
+    naming_box.focus(); // trap the cursor
     naming_box.addEventListener("focusout", e => {
-        console.log(e.target.value);
-        mouseClick = false;
-        createClassedDivAt(x, y, e.target.value, ['seasontitle']);
+        mouseClick = false; // cancel the create new thing event
 
+        // create the replacement <div> 
+        createClassedDivAt(x, y, e.target.value, ['seasontitle']); 
+        
+        // remove the inputs
         e.target.twin.parentNode.removeChild(e.target.twin);
         e.target.parentNode.removeChild(e.target);
     });
