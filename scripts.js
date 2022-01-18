@@ -17,6 +17,7 @@ let box; // div which holds the whole scrolling calendar
 let lastMouse;
 let startMouse;
 let mouseDown = false;
+let mouseClick = false;
 
 
 /* setup -----------------------------------------------*/
@@ -72,17 +73,25 @@ function createMonthLabel(x, label) {
 /* UI ---------------------------------------------- */
 
 
+function createSeasonObject(x, y) {
+    createClassedDivAt(x, y, "IT WORKS SEASON", ['seasontitle', 'foregound']);
+}
+
 
 /* Helper Functions -------------------------------- */
 
 // helper for creating a generic div on the calendar.
 function createClassedDiv(x, text, classes) {
+    createClassedDivAt(x, 0, text, classes);
+}
+
+function createClassedDivAt(x, y, text, classes) {
     let elem = document.createElement("div");
     for (let clazz of classes) {
         elem.classList.add(clazz);
     }
     elem.innerText = text;
-    addChildToContainer(box, elem, x, 0);
+    addChildToContainer(box, elem, x, y);
 }
 
 // given an object, insert it into the container at the specified position, and clone it
@@ -132,19 +141,29 @@ function addEventListeners() {
         }
     });
 
+    // mouse down handler for the calendar
     document.getElementById("calendar-box").addEventListener("mousedown", e => {
         lastMouse = {x: e.clientX, y: e.clientY};
         startMouse = {x: e.clientX, y: e.clientY};
         mouseDown = true;
-        
+        mouseClick = true;
     });
+
+    // mouse up handler for the calendar
     document.getElementById("calendar-box").addEventListener("mouseup", e => {
+        if (mouseClick && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) <= MAX_CLICK_DISTANCE) {
+            // do a click
+            console.log("click");
+            createSeasonObject(e.clientX, e.clientY);
+        }
         mouseDown = false;
-        
     });
+
+    // mouse movement handler for the calendar
     document.getElementById("calendar-box").addEventListener("mousemove", e => {
         if (mouseDown && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) >= MAX_CLICK_DISTANCE) {
             scrollChildrenSideways(box, e.clientX - lastMouse.x);
+            mouseClick = false; // this mouse interaction can no longer be a click
         }
         lastMouse = {x: e.clientX, y: e.clientY};
     });
