@@ -47,6 +47,18 @@ html, body {
     border-style:solid;
 }
 
+.seasontitle {
+    font-family: sans;
+    border-width:1px;
+    border-color:#000000;
+    border-style: solid;
+}
+
+.seasoninput {
+    
+}
+
+
 .monthname {
     margin: 2px;
     margin-left: 8px;

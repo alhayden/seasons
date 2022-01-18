@@ -1,7 +1,7 @@
 "use strict";
 document.addEventListener('DOMContentLoaded', setup); // called once page is loaded
 
-const MAX_CLICK_DISTANCE = 10; // maximum mouse movement before it becomes a drag rather than a click
+const MAX_CLICK_DISTANCE = 16; // maximum mouse movement before it becomes a drag rather than a click
 const SCROLL_STEP = 16; // amount of pixels to move each scroll wheel tick
 
 // months to be displayed in the background:
@@ -61,12 +61,12 @@ function createSolsticeLabels() {
 
 // creates a vertical line in the calendar at horizontal position x
 function createVerticalDivision(x) {
-    createClassedDiv(x, '', ['verticaldivision', 'background']);
+    return createClassedDiv(x, '', ['verticaldivision', 'background']);
 }
 
 // creates a month label on the calendar at horizontal position x
 function createMonthLabel(x, label) {
-    createClassedDiv(x, label, ['monthname', 'background']);
+    return createClassedDiv(x, label, ['monthname', 'background']);
 }
 
 
@@ -74,24 +74,39 @@ function createMonthLabel(x, label) {
 
 
 function createSeasonObject(x, y) {
-    createClassedDivAt(x, y, "IT WORKS SEASON", ['seasontitle', 'foregound']);
+    y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
+    let naming_box = createClassedElementAt(x, y, "it works?", ['seasoninput'], 'input');
+    naming_box.focus();
+    naming_box.addEventListener("focusout", e => {
+        console.log(e.target.value);
+        mouseClick = false;
+        createClassedDivAt(x, y, e.target.value, ['seasontitle']);
+
+        e.target.twin.parentNode.removeChild(e.target.twin);
+        e.target.parentNode.removeChild(e.target);
+    });
 }
 
 
 /* Helper Functions -------------------------------- */
 
-// helper for creating a generic div on the calendar.
+// helper for createClassedDivAt but with default y=0
 function createClassedDiv(x, text, classes) {
-    createClassedDivAt(x, 0, text, classes);
+    return createClassedDivAt(x, 0, text, classes);
 }
 
+// helper for creating a generic div on the calendar.
 function createClassedDivAt(x, y, text, classes) {
-    let elem = document.createElement("div");
+    return createClassedElementAt(x, y, text, classes, 'div');
+}
+function createClassedElementAt(x, y, text, classes, elementType) {
+    let elem = document.createElement(elementType);
     for (let clazz of classes) {
         elem.classList.add(clazz);
     }
     elem.innerText = text;
     addChildToContainer(box, elem, x, y);
+    return elem;
 }
 
 // given an object, insert it into the container at the specified position, and clone it
@@ -108,6 +123,9 @@ function addChildToContainer(container, child, x, y) {
     container.appendChild(extraChild);
     extraChild.style.left = (x + doc_width) + "px";
     extraChild.style.top = y + "px";
+
+    child.twin = extraChild;
+    extraChild.twin = child;
 }
 
 // translate all of the children of the given container sideways by the given amount
