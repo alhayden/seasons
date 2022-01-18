@@ -2,7 +2,9 @@
 document.addEventListener('DOMContentLoaded', setup); // called once page is loaded
 
 const scroll_step = 16; // amount of pixels to move each scroll wheel tick
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const SOLSTICES = ['June Solstice', 'December Solstice'];
+const SOLSTICEDATES = [171, 355]; // June 21,  December 21
 let doc_width; 
 let box; // div which holds the whole scrolling calendar
 
@@ -23,27 +25,46 @@ function setup() {
     createCalendarBackground();
 }
 
+/* Background graphics -------------------------------- */
 function createCalendarBackground() {
     let step = doc_width / MONTHS.length;
     for (let i = 0; i < MONTHS.length; i++) {
         createVerticalDivision(i * step);
         createMonthLabel(i * step, MONTHS[i]);
     }
+    createSolsticeLabels();
+}
+
+function createSolsticeLabels() {
+    for (let i = 0; i < SOLSTICES.length; i++) {
+        let x = SOLSTICEDATES[i] * (doc_width / 365);
+        createVerticalDivision(x);
+        createClassedDiv(x, SOLSTICES[i], ['datelabel', 'background']);
+    }
 }
 
 function createVerticalDivision(x) {
-    let elem = document.createElement('div');
-    elem.classList.add('verticaldivision');
-    addChildToContainer(box, elem, x, 0);
+    createClassedDiv(x, '', ['verticaldivision', 'background']);
 }
 
 function createMonthLabel(x, label) {
-    let elem = document.createElement('div');
-    elem.classList.add('monthname');
-    elem.innerText = label;
+    createClassedDiv(x, label, ['monthname', 'background']);
+}
+
+function createClassedDiv(x, text, classes) {
+    let elem = document.createElement("div");
+    for (let clazz of classes) {
+        elem.classList.add(clazz);
+    }
+    elem.innerText = text;
     addChildToContainer(box, elem, x, 0);
 }
 
+/* UI ---------------------------------------------- */
+
+
+
+/* Helper Functions -------------------------------- */
 function addChildToContainer(container, child, x, y) {
     child.classList.add("calendarobject");
     container.appendChild(child);
@@ -52,8 +73,6 @@ function addChildToContainer(container, child, x, y) {
     let extraChild = child.cloneNode();
     extraChild.innerHTML = child.innerHTML;
     extraChild.innerText = child.innerText;
-    console.log(child);
-    console.log(extraChild);
     container.appendChild(extraChild);
     extraChild.style.left = (x + doc_width) + "px";
     extraChild.style.top = y + "px";
