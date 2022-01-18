@@ -1,15 +1,25 @@
 "use strict";
 document.addEventListener('DOMContentLoaded', setup); // called once page is loaded
 
-const scroll_step = 16; // amount of pixels to move each scroll wheel tick
+const MAX_CLICK_DISTANCE = 10; // maximum mouse movement before it becomes a drag rather than a click
+const SCROLL_STEP = 16; // amount of pixels to move each scroll wheel tick
+
+// months to be displayed in the background:
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const SOLSTICES = ['June Solstice', 'December Solstice'];
-const SOLSTICEDATES = [171, 355]; // June 21,  December 21
+// important dates to be displayed on the background, labels and then days
+const DATE_LABELS = ['June Solstice', 'December Solstice'];
+const DATES = [171, 355]; // June 21,  December 21
+
+/* --- defined in setup() --- */
 let doc_width; 
 let box; // div which holds the whole scrolling calendar
 
+let lastMouse;
+let startMouse;
+let mouseDown = false;
 
-// setup ----------
+
+/* setup -----------------------------------------------*/
 
 function setup() {
     // get the "box" (div which contains the calendar)
@@ -26,31 +36,46 @@ function setup() {
 }
 
 /* Background graphics -------------------------------- */
+
+// create faint background markings of a familiar calendar
 function createCalendarBackground() {
     let step = doc_width / MONTHS.length;
+    // loop through the months, creating a division and label for each
     for (let i = 0; i < MONTHS.length; i++) {
         createVerticalDivision(i * step);
         createMonthLabel(i * step, MONTHS[i]);
     }
+    // mark the solstices
     createSolsticeLabels();
 }
 
+// generate markings at the location of each solstice
 function createSolsticeLabels() {
-    for (let i = 0; i < SOLSTICES.length; i++) {
-        let x = SOLSTICEDATES[i] * (doc_width / 365);
+    for (let i = 0; i < DATE_LABELS.length; i++) {
+        let x = DATES[i] * (doc_width / 365);
         createVerticalDivision(x);
-        createClassedDiv(x, SOLSTICES[i], ['datelabel', 'background']);
+        createClassedDiv(x, DATE_LABELS[i], ['datelabel', 'background']);
     }
 }
 
+// creates a vertical line in the calendar at horizontal position x
 function createVerticalDivision(x) {
     createClassedDiv(x, '', ['verticaldivision', 'background']);
 }
 
+// creates a month label on the calendar at horizontal position x
 function createMonthLabel(x, label) {
     createClassedDiv(x, label, ['monthname', 'background']);
 }
 
+
+/* UI ---------------------------------------------- */
+
+
+
+/* Helper Functions -------------------------------- */
+
+// helper for creating a generic div on the calendar.
 function createClassedDiv(x, text, classes) {
     let elem = document.createElement("div");
     for (let clazz of classes) {
@@ -60,16 +85,14 @@ function createClassedDiv(x, text, classes) {
     addChildToContainer(box, elem, x, 0);
 }
 
-/* UI ---------------------------------------------- */
-
-
-
-/* Helper Functions -------------------------------- */
+// given an object, insert it into the container at the specified position, and clone it
+// for the wrapping functionality.
 function addChildToContainer(container, child, x, y) {
     child.classList.add("calendarobject");
     container.appendChild(child);
     child.style.left = x + "px";
     child.style.top = y + "px";
+    // make the copy
     let extraChild = child.cloneNode();
     extraChild.innerHTML = child.innerHTML;
     extraChild.innerText = child.innerText;
@@ -103,9 +126,26 @@ function addEventListeners() {
     // add listener for mouse scroll wheel use
     document.getElementById("body").addEventListener("wheel", e => {
         if (e.deltaY < 0) {
-            scrollChildrenSideways(box, scroll_step);
+            scrollChildrenSideways(box, SCROLL_STEP);
         } else {
-            scrollChildrenSideways(box, -1 * scroll_step);
+            scrollChildrenSideways(box, -1 * SCROLL_STEP);
         }
+    });
+
+    document.getElementById("calendar-box").addEventListener("mousedown", e => {
+        lastMouse = {x: e.clientX, y: e.clientY};
+        startMouse = {x: e.clientX, y: e.clientY};
+        mouseDown = true;
+        
+    });
+    document.getElementById("calendar-box").addEventListener("mouseup", e => {
+        mouseDown = false;
+        
+    });
+    document.getElementById("calendar-box").addEventListener("mousemove", e => {
+        if (mouseDown && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) >= MAX_CLICK_DISTANCE) {
+            scrollChildrenSideways(box, e.clientX - lastMouse.x);
+        }
+        lastMouse = {x: e.clientX, y: e.clientY};
     });
 }

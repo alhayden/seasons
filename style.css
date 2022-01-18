@@ -62,3 +62,8 @@ html, body {
     color: #d0d0d0;
     font-family: sans;
 }
+
+.background {
+    user-select: none;
+    cursor: pointer;
+}
