@@ -79,6 +79,7 @@ function createMonthLabel(x, label) {
 
 function createSeasonInput(x, y) {
 
+    // if the input would fall of the screen, scroll the calendar so it fits.
     if (x > doc_width - 175) {
         scrollChildrenSideways(box, (doc_width - 175) - x);
         x = doc_width - 175;
@@ -86,8 +87,10 @@ function createSeasonInput(x, y) {
 
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
     y -= 8; // center around pointer
-    y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING;
-    let color = COLORS[(Math.round(y / VERTICAL_SPACING) + COLORS.length) % COLORS.length];
+    y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
+    // get a color based on height
+    //let color = COLORS[(Math.round(y / VERTICAL_SPACING) + COLORS.length) % COLORS.length];
+    let color = COLORS[Math.floor(Math.random() * COLORS.length)];
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
 
@@ -117,13 +120,16 @@ function createSeasonInput(x, y) {
 
 // create the label/bar pair that represents a season on the calendar
 function createSeasonObject(x, y, label, color) {
-    let title = createClassedDivAt(x, y, label, ['seasontitle']);
-    let duration = createClassedDivAt(x, y + 20, '', ['seasonduration']);
+    // make the label and bar
+    let title = createClassedDivAt(x, y, label, ['seasontitle', 'foreground']);
+    let duration = createClassedDivAt(x, y + 20, '', ['seasonduration', 'foreground']);
 
+    // set the styles
     twinnedStyle(title, "color", color);
     twinnedStyle(duration, "backgroundColor", color);
     twinnedStyle(duration, "width", "4px");
     
+    // add the handles for resizing
     let resizer1 = createResizerForDuration(duration);
     let resizer2 = createResizerForDuration(duration.twin);
     resizer1.twin = resizer2;
@@ -136,6 +142,7 @@ function createSeasonObject(x, y, label, color) {
 function createResizerForDuration(duration) {
     let resizer = document.createElement("div");
     resizer.classList.add("seasonresizer");
+    resizer.classList.add("foreground");
     resizer.style.marginLeft = (parseInt(duration.style.width) - 4) + "px";
     duration.appendChild(resizer);
     duration.resizer = resizer;
@@ -146,6 +153,7 @@ function setupResizer(resizer) {
     
     resizer.onMouseMove = e => {
         if (mouseDown) {
+            // drag to change the length of a season bar
             let duration = resizer.parentElement;
             let diff = e.clientX - lastMouse.x;
             let width = Math.max(parseInt(duration.style.width) + diff, 4);
@@ -157,6 +165,17 @@ function setupResizer(resizer) {
     resizer.addEventListener("mousedown", e => {
         selectedObject = resizer;
     });
+}
+
+function jsonizeCalendar() {
+    
+}
+
+function clearCalendar() {
+    let elems = document.getElementsByClassName("foreground");
+    while(elems[0]) {
+        elems[0].remove();
+    }
 }
 
 

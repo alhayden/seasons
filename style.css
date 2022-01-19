@@ -5,9 +5,6 @@ html, body {
 
     background-color: #ffffff;
 
-    image-rendering: crisp-edges;
-    image-rendering: pixelated;
-
     max-width:100%;
     overflow-x:hidden;
     overscroll-behavior: none;
@@ -19,7 +16,7 @@ html, body {
     background:#ffffff;
     position: relative;
     width: 200%;
-    height: 50%;
+    height: 70%;
     margin-top: 10px;
     margin-bottom: 10px;
 }
@@ -92,4 +89,12 @@ html, body {
 .background {
     user-select: none;
     cursor: default;
+}
+
+.submitbutton {
+    margin: 30px;
+    padding: 18px;
+    width: 20%;
+    font-size: 21px;
+    
 }
