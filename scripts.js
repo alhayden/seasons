@@ -78,6 +78,12 @@ function createMonthLabel(x, label) {
 
 
 function createSeasonInput(x, y) {
+
+    if (x > doc_width - 175) {
+        scrollChildrenSideways(box, (doc_width - 175) - x);
+        x = doc_width - 175;
+    }
+
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
     y -= 8; // center around pointer
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING;
@@ -87,7 +93,7 @@ function createSeasonInput(x, y) {
 
     // resize while typing and submit on enter
     naming_box.addEventListener("keydown", e => {
-        e.target.size = Math.max(e.target.size, e.target.value.length); // mostly works
+        e.target.twin.value = e.target.value;
         if (e.keyCode == 13) {
             e.target.blur();
             return false;

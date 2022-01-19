@@ -91,5 +91,5 @@ html, body {
 
 .background {
     user-select: none;
-    cursor: pointer;
+    cursor: default;
 }
