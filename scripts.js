@@ -21,6 +21,7 @@ let lastMouse;
 let startMouse;
 let mouseDown = false;
 let mouseClick = false;
+let selectedObject = null;
 
 
 /* setup -----------------------------------------------*/
@@ -76,7 +77,7 @@ function createMonthLabel(x, label) {
 /* UI ---------------------------------------------- */
 
 
-function createSeasonObject(x, y) {
+function createSeasonInput(x, y) {
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
     y -= 8; // center around pointer
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING;
@@ -97,15 +98,9 @@ function createSeasonObject(x, y) {
     naming_box.addEventListener("focusout", e => {
         mouseClick = false; // cancel the create new thing event
 
-        // create the replacement <div> 
+        // create the replacement <div>s
         if (e.target.value.length > 0) {
-            let title = createClassedDivAt(x, y, e.target.value, ['seasontitle']);
-            let duration = createClassedDivAt(x, y + 20, '', ['seasonduration']);
-            // TODO: make this more readable?
-            title.style.color = color;
-            title.twin.style.color = color;
-            duration.style.backgroundColor = color;
-            duration.twin.style.backgroundColor = color;
+            createSeasonObject(x, y, e.target.value, color);
         }
         
         // remove the inputs
@@ -114,8 +109,57 @@ function createSeasonObject(x, y) {
     });
 }
 
+// create the label/bar pair that represents a season on the calendar
+function createSeasonObject(x, y, label, color) {
+    let title = createClassedDivAt(x, y, label, ['seasontitle']);
+    let duration = createClassedDivAt(x, y + 20, '', ['seasonduration']);
+
+    twinnedStyle(title, "color", color);
+    twinnedStyle(duration, "backgroundColor", color);
+    twinnedStyle(duration, "width", "4px");
+    
+    let resizer1 = createResizerForDuration(duration);
+    let resizer2 = createResizerForDuration(duration.twin);
+    resizer1.twin = resizer2;
+    resizer2.twin = resizer1;
+    setupResizer(resizer1);
+    setupResizer(resizer2);
+
+}
+
+function createResizerForDuration(duration) {
+    let resizer = document.createElement("div");
+    resizer.classList.add("seasonresizer");
+    resizer.style.marginLeft = (parseInt(duration.style.width) - 4) + "px";
+    duration.appendChild(resizer);
+    duration.resizer = resizer;
+    return resizer;
+}
+
+function setupResizer(resizer) {
+    
+    resizer.onMouseMove = e => {
+        if (mouseDown) {
+            let duration = resizer.parentElement;
+            let diff = e.clientX - lastMouse.x;
+            let width = Math.max(parseInt(duration.style.width) + diff, 4);
+            width = Math.min(doc_width, width); // bound to width of document (1 year)
+            twinnedStyle(duration, "width", width + "px");
+            twinnedStyle(resizer, "marginLeft", (width - 4) + "px");
+        }
+    };
+    resizer.addEventListener("mousedown", e => {
+        selectedObject = resizer;
+    });
+}
+
 
 /* Helper Functions -------------------------------- */
+
+function twinnedStyle(object, attribute, value) {
+    object.style[attribute] = value;
+    object.twin.style[attribute] = value;
+}
 
 // helper for createClassedDivAt but with default y=0
 function createClassedDiv(x, text, classes) {
@@ -164,9 +208,9 @@ function scrollChildrenSideways(container, amount) {
         // move the object
         let currX = parseInt(i.style.left);
         currX += amount;
-        if (currX > doc_width * 1.5) {
+        if (currX > doc_width * 1) {
             currX -= doc_width * 2;
-        } else if (currX < doc_width * -0.5) {
+        } else if (currX < doc_width * -1) {
             currX += doc_width * 2;
         }
 
@@ -199,14 +243,18 @@ function addEventListeners() {
         if (mouseClick && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) <= MAX_CLICK_DISTANCE) {
             // do a click
             console.log("click");
-            createSeasonObject(e.clientX, e.clientY);
+            createSeasonInput(e.clientX, e.clientY);
         }
         mouseDown = false;
+        selectedObject = null;
     });
 
     // mouse movement handler for the calendar
     document.getElementById("calendar-box").addEventListener("mousemove", e => {
-        if (mouseDown && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) >= MAX_CLICK_DISTANCE) {
+        if (selectedObject) {
+            selectedObject.onMouseMove(e);
+        }
+        else if (mouseDown && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) >= MAX_CLICK_DISTANCE) {
             scrollChildrenSideways(box, e.clientX - lastMouse.x);
             mouseClick = false; // this mouse interaction can no longer be a click
         }

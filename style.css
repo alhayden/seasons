@@ -57,12 +57,19 @@ html, body {
 .seasonduration {
     height: 16px;
     width: 4px;
+    text-align: right;
+}
+
+.seasonresizer {
+    width: 8px;
+    height:100%;
     cursor: ew-resize;
 }
 
 .seasoninput {
     font-family: sans;
     background: #ffffff;
+    overflow: hide;
 }
 
 
