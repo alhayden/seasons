@@ -75,13 +75,28 @@ function createMonthLabel(x, label) {
 
 function createSeasonObject(x, y) {
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
+    y -= 8; // center around pointer
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
+
+    // resize while typing and submit on enter
+    naming_box.addEventListener("keydown", e => {
+        e.target.size = Math.max(e.target.size, e.target.value.length); // mostly works
+        if (e.keyCode == 13) {
+            e.target.blur();
+            return false;
+        }
+    });
+
+    // save and convert to div on lost focus
     naming_box.addEventListener("focusout", e => {
         mouseClick = false; // cancel the create new thing event
 
         // create the replacement <div> 
-        createClassedDivAt(x, y, e.target.value, ['seasontitle']); 
+        if (e.target.value.length > 0) {
+            createClassedDivAt(x, y, e.target.value, ['seasontitle']);
+            createClassedDivAt(x, y + 20, '', ['seasonduration']);
+        }
         
         // remove the inputs
         e.target.twin.parentNode.removeChild(e.target.twin);

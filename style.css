@@ -55,6 +55,12 @@ html, body {
     border-style: solid;
 }
 
+.seasonduration {
+    height: 16px;
+    width: 10px;
+    background-color: #aaaaaa;
+}
+
 .seasoninput {
     font-family: sans;
 }
