@@ -50,19 +50,19 @@ html, body {
 .seasontitle {
     font-family: sans;
     border-width:0px;
-    border-bottom-width:1px;
-    border-color:#000000;
-    border-style: solid;
+    user-select: none;
+    cursor: text;
 }
 
 .seasonduration {
     height: 16px;
-    width: 10px;
-    background-color: #aaaaaa;
+    width: 4px;
+    cursor: ew-resize;
 }
 
 .seasoninput {
     font-family: sans;
+    background: #ffffff;
 }
 
 
@@ -74,7 +74,7 @@ html, body {
 }
 
 .datelabel {
-    margin: 8px;
+    margin: 20px;
     margin-left: 4px;
     writing-mode: vertical-rl;
     text-orientation: mixed;

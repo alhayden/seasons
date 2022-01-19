@@ -10,6 +10,9 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const DATE_LABELS = ['June Solstice', 'December Solstice'];
 const DATES = [171, 355]; // June 21,  December 21
 
+const COLORS = ["#1E3888", "#47A8BD", "#E6D10F", "#FFAD69", "#9C3848"];
+const VERTICAL_SPACING = 40;
+
 /* --- defined in setup() --- */
 let doc_width; 
 let box; // div which holds the whole scrolling calendar
@@ -76,6 +79,8 @@ function createMonthLabel(x, label) {
 function createSeasonObject(x, y) {
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
     y -= 8; // center around pointer
+    y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING;
+    let color = COLORS[(Math.round(y / VERTICAL_SPACING) + COLORS.length) % COLORS.length];
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
 
@@ -94,8 +99,13 @@ function createSeasonObject(x, y) {
 
         // create the replacement <div> 
         if (e.target.value.length > 0) {
-            createClassedDivAt(x, y, e.target.value, ['seasontitle']);
-            createClassedDivAt(x, y + 20, '', ['seasonduration']);
+            let title = createClassedDivAt(x, y, e.target.value, ['seasontitle']);
+            let duration = createClassedDivAt(x, y + 20, '', ['seasonduration']);
+            // TODO: make this more readable?
+            title.style.color = color;
+            title.twin.style.color = color;
+            duration.style.backgroundColor = color;
+            duration.twin.style.backgroundColor = color;
         }
         
         // remove the inputs
