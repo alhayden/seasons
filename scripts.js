@@ -23,6 +23,8 @@ let mouseDown = false;
 let mouseClick = false;
 let selectedObject = null;
 
+let totalOffset = 0;
+
 
 /* setup -----------------------------------------------*/
 
@@ -84,6 +86,7 @@ function createSeasonInput(x, y) {
         scrollChildrenSideways(box, (doc_width - 175) - x);
         x = doc_width - 175;
     }
+    y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
 
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
     y -= 8; // center around pointer
@@ -124,6 +127,9 @@ function createSeasonObject(x, y, label, color) {
     let title = createClassedDivAt(x, y, label, ['seasontitle', 'foreground']);
     let duration = createClassedDivAt(x, y + 20, '', ['seasonduration', 'foreground']);
 
+    title.classList.add("saveable-object");
+    title.duration = duration;
+
     // set the styles
     twinnedStyle(title, "color", color);
     twinnedStyle(duration, "backgroundColor", color);
@@ -136,7 +142,7 @@ function createSeasonObject(x, y, label, color) {
     resizer2.twin = resizer1;
     setupResizer(resizer1);
     setupResizer(resizer2);
-
+    return title;
 }
 
 function createResizerForDuration(duration) {
@@ -150,14 +156,16 @@ function createResizerForDuration(duration) {
 }
 
 function setupResizer(resizer) {
-    
+    let duration = resizer.parentElement;
     resizer.onMouseMove = e => {
         if (mouseDown) {
             // drag to change the length of a season bar
-            let duration = resizer.parentElement;
             let diff = e.clientX - lastMouse.x;
             let width = Math.max(parseInt(duration.style.width) + diff, 4);
             width = Math.min(doc_width, width); // bound to width of document (1 year)
+            if (e.clientX < parseInt(duration.style.left)) {
+                width = 4;
+            }
             twinnedStyle(duration, "width", width + "px");
             twinnedStyle(resizer, "marginLeft", (width - 4) + "px");
         }
@@ -168,7 +176,33 @@ function setupResizer(resizer) {
 }
 
 function jsonizeCalendar() {
-    
+    let data = {};
+    data.elements = [];
+    let elems = document.getElementsByClassName("saveable-object");
+    for (let elem of elems) {
+        let jsonElem = {};
+        jsonElem.title = elem.innerText;
+        jsonElem.start =  Math.floor(((((parseInt(elem.style.left) - totalOffset) % doc_width) + doc_width) % doc_width) / doc_width * 365);
+        jsonElem.duration = Math.round(parseInt(elem.duration.style.width) / doc_width * 365);
+        jsonElem.color = elem.style.color;
+        jsonElem.y = Math.round(parseInt(elem.style.top) / VERTICAL_SPACING);
+        data.elements.push(jsonElem);
+    }
+    return JSON.stringify(data);
+}
+
+function calendarFromJson(json) {
+    let data = JSON.parse(json);
+    for (let elem of data.elements) {
+        let title = elem.title;
+        let color = elem.color;
+        let duration = Math.round(elem.duration / 365 * doc_width);
+        let y = elem.y * VERTICAL_SPACING;
+        let x = Math.round(((((elem.start / 365 * doc_width) + totalOffset) % doc_width) + doc_width) % doc_width);
+        let seasonObj = createSeasonObject(x, y, title, color);
+        twinnedStyle(seasonObj.duration, "width", duration + "px");
+        twinnedStyle(seasonObj.duration.resizer, "marginLeft", (duration - 4) + "px");
+    }
 }
 
 function clearCalendar() {
@@ -226,6 +260,9 @@ function addChildToContainer(container, child, x, y) {
 
 // translate all of the children of the given container sideways by the given amount
 function scrollChildrenSideways(container, amount) {
+    
+    totalOffset += amount;
+    
     for (let i of container.children) { // loop through children
         if (i.style.left == '') {   
             continue;  // ignore elements that were initialized without a position
