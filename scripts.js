@@ -217,6 +217,7 @@ async function submitCalendarToDB() {
     const json = jsonizeCalendar();
     const response = await fetch("http://f-1.karel.pw:8000/put", {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
             'Content-Type': 'application/json'
         },
