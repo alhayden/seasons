@@ -92,8 +92,8 @@ html, body {
 }
 
 .submitbutton {
-    margin: 30px;
-    padding: 18px;
+    margin: 20px;
+    padding: 12px;
     width: 20%;
     font-size: 21px;
     user-select:none;
@@ -137,4 +137,15 @@ html, body {
     height:16px;
     background-color: #cccccc;
     border-radius:3px;
+}
+
+.infobox {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.instructions {
+    font-family: sans;
+    width: 70%;
 }

@@ -16,12 +16,14 @@ const VERTICAL_SPACING = 40;
 let doc_width; 
 let box; // div which holds the whole scrolling calendar
 
+// global information about mouse interactions with the calendar
 let lastMouse;
 let startMouse;
 let mouseDown = false;
 let mouseClick = false;
 let selectedObject = null;
 
+// how far the calendar has been scrolled in this session
 let totalOffset = 0;
 
 
@@ -147,6 +149,7 @@ function createSeasonObject(x, y, label, color) {
     return title;
 }
 
+// generate resizder objects for a duration maker
 function createResizerForDuration(duration) {
     let resizer = document.createElement("div");
     resizer.classList.add("seasonresizer");
@@ -157,6 +160,7 @@ function createResizerForDuration(duration) {
     return resizer;
 }
 
+// add listeners to a resizer to change the length of a duration marker
 function setupResizer(resizer) {
     let duration = resizer.parentElement;
     resizer.onMouseMove = e => {
@@ -177,6 +181,7 @@ function setupResizer(resizer) {
     });
 }
 
+// given a season title, add listeners to create a label editor when it is clicked.
 function setupSeasonEditability(title) {
     title.addEventListener("click", e => {
         const x = parseInt(title.style.left);
