@@ -222,7 +222,7 @@ async function submitCalendarToDB() {
             'Content-Type': 'application/json'
         },
         body: json});
-    alert("Saved successfully!");
+    alert("Calendar saved successfully!");
 
 }
 
@@ -305,7 +305,8 @@ function addEventListeners() {
             scrollChildrenSideways(box, -1 * SCROLL_STEP);
         }
     });
-
+    
+    // calendar box -------------------------------------------------------------
     // mouse down handler for the calendar
     document.getElementById("calendar-box").addEventListener("mousedown", e => {
         lastMouse = {x: e.clientX, y: e.clientY};
@@ -337,7 +338,39 @@ function addEventListeners() {
         lastMouse = {x: e.clientX, y: e.clientY};
     });
 
-    document.getElementById("submit-button").addEventListener("click", e=> {
+    // submit button ----------------------------------------------------------
+    document.getElementById("submit-button").addEventListener("click", e => {
         submitCalendarToDB();
     });
+
+    setupScrollBarFunctionality();
+
+}
+
+function setupScrollBarFunctionality() {
+    let _mouseDown = false;
+    document.getElementById("scroller").style.left = (doc_width / 2) - 21 + "px";
+    //scroll bar -------------------------------------------------------------
+    document.getElementById("scroll-bar").addEventListener("mousedown", e => {
+        _mouseDown = true;
+        _updateScrollerPositionAndScroll(e);
+    });
+    document.getElementById("body").addEventListener("mouseup", e => {
+        _mouseDown = false;
+        document.getElementById("scroller").style.left = (doc_width / 2) - 21 + "px";
+    });
+    document.getElementById("body").addEventListener("mousemove", e => {
+        _updateScrollerPositionAndScroll(e);
+    });
+
+    function _updateScrollerPositionAndScroll(e) {
+        const lastX = parseInt(document.getElementById("scroller").style.left) + 21;
+        const newX = Math.max(Math.min(e.clientX, doc_width - 21), 21);
+        if(_mouseDown) {
+            scrollChildrenSideways(box, newX - lastX);
+            document.getElementById("scroller").style.left = newX - 21 + "px";
+        }
+
+    }
+
 }
