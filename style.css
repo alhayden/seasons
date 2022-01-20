@@ -105,13 +105,20 @@ html, body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: stretch;
     margin: 4px;
 }
 
 .buttonsleft {
+    display:flex;
+    align-items:stretch;
 }
 
 .buttonsright {
+}
+
+.fullheight {
+    height:100%;
 }
 
 .topbutton {

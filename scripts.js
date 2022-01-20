@@ -10,7 +10,6 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const DATE_LABELS = ['June Solstice', 'December Solstice'];
 const DATES = [171, 355]; // June 21,  December 21
 
-const COLORS = ["#1E3888", "#47A8BD", "#E6D10F", "#FFAD69", "#9C3848"];
 const VERTICAL_SPACING = 40;
 
 /* --- defined in setup() --- */
@@ -38,8 +37,10 @@ function setup() {
 
     // set up the event listeners (for user input)
     addEventListeners();
-
+    
+    // make the background
     createCalendarBackground();
+
 }
 
 /* Background graphics -------------------------------- */
@@ -78,7 +79,6 @@ function createMonthLabel(x, label) {
 
 /* UI ---------------------------------------------- */
 
-
 function createSeasonInput(x, y) {
 
     // if the input would fall of the screen, scroll the calendar so it fits.
@@ -91,9 +91,6 @@ function createSeasonInput(x, y) {
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
     y -= 8; // center around pointer
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
-    // get a color based on height
-    //let color = COLORS[(Math.round(y / VERTICAL_SPACING) + COLORS.length) % COLORS.length];
-    //let color = COLORS[Math.floor(Math.random() * COLORS.length)];
     const color = document.getElementById("color-picker").value;
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
@@ -143,6 +140,10 @@ function createSeasonObject(x, y, label, color) {
     resizer2.twin = resizer1;
     setupResizer(resizer1);
     setupResizer(resizer2);
+
+    // editing stuff
+    setupSeasonEditability(title);
+    setupSeasonEditability(title.twin);
     return title;
 }
 
@@ -176,6 +177,38 @@ function setupResizer(resizer) {
     });
 }
 
+function setupSeasonEditability(title) {
+    title.addEventListener("click", e => {
+        const x = parseInt(title.style.left);
+        const y = parseInt(title.style.top);
+        let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
+        naming_box.value = title.innerText;
+        naming_box.focus(); // trap the cursor
+
+        mouseClick = false;
+
+        // resize while typing and submit on enter
+        naming_box.addEventListener("keydown", e => {
+            e.target.twin.value = e.target.value;
+            if (e.keyCode == 13) {
+                e.target.blur();
+                return false;
+            }
+        });
+        // save and convert to div on lost focus
+        naming_box.addEventListener("focusout", e => {
+            mouseClick = false; // cancel the create new thing event
+            title.innerText = e.target.value;
+            title.twin.innerText = e.target.value;
+            
+            // remove the inputs
+            e.target.twin.parentNode.removeChild(e.target.twin);
+            e.target.parentNode.removeChild(e.target);
+        });
+    });
+}
+
+// JSON conversion - data communication
 function jsonizeCalendar() {
     let data = {};
     data.version = 1;
@@ -193,6 +226,7 @@ function jsonizeCalendar() {
     return JSON.stringify(data);
 }
 
+// load the calendar from a json object
 function calendarFromJson(json) {
     let data = JSON.parse(json);
     for (let elem of data.elements) {
@@ -214,6 +248,10 @@ function clearCalendar() {
     }
 }
 
+function resetCalendar() {
+    window.location.reload();
+}
+
 async function submitCalendarToDB() {
     const json = jsonizeCalendar();
     const response = await fetch("http://f-1.karel.pw:8000/put", {
@@ -230,6 +268,7 @@ async function submitCalendarToDB() {
 
 /* Helper Functions -------------------------------- */
 
+// apply style to both this object and it's twin
 function twinnedStyle(object, attribute, value) {
     object.style[attribute] = value;
     object.twin.style[attribute] = value;
@@ -244,6 +283,8 @@ function createClassedDiv(x, text, classes) {
 function createClassedDivAt(x, y, text, classes) {
     return createClassedElementAt(x, y, text, classes, 'div');
 }
+
+// create a generic element with the given class, location, text, and type
 function createClassedElementAt(x, y, text, classes, elementType) {
     let elem = document.createElement(elementType);
     for (let clazz of classes) {
@@ -342,6 +383,10 @@ function addEventListeners() {
     // submit button ----------------------------------------------------------
     document.getElementById("submit-button").addEventListener("click", e => {
         submitCalendarToDB();
+    });
+
+    document.getElementById("reset-button").addEventListener("click", e => {
+        resetCalendar();
     });
 
     setupScrollBarFunctionality();
