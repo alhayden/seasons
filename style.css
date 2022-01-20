@@ -100,6 +100,24 @@ html, body {
     
 }
 
+
+.buttonbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 4px;
+}
+
+.buttonsleft {
+}
+
+.buttonsright {
+}
+
+.topbutton {
+    font-size:24px;
+}
+
 .scrollbar {
     width:100%;
     height:16px;

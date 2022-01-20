@@ -93,7 +93,8 @@ function createSeasonInput(x, y) {
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
     // get a color based on height
     //let color = COLORS[(Math.round(y / VERTICAL_SPACING) + COLORS.length) % COLORS.length];
-    let color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    //let color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const color = document.getElementById("color-picker").value;
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
 
@@ -344,13 +345,12 @@ function addEventListeners() {
     });
 
     setupScrollBarFunctionality();
-
 }
 
 function setupScrollBarFunctionality() {
     let _mouseDown = false;
     document.getElementById("scroller").style.left = (doc_width / 2) - 21 + "px";
-    //scroll bar -------------------------------------------------------------
+    
     document.getElementById("scroll-bar").addEventListener("mousedown", e => {
         _mouseDown = true;
         _updateScrollerPositionAndScroll(e);
