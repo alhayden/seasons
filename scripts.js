@@ -177,6 +177,7 @@ function setupResizer(resizer) {
 
 function jsonizeCalendar() {
     let data = {};
+    data.version = 1;
     data.elements = [];
     let elems = document.getElementsByClassName("saveable-object");
     for (let elem of elems) {
@@ -210,6 +211,18 @@ function clearCalendar() {
     while(elems[0]) {
         elems[0].remove();
     }
+}
+
+async function submitCalendarToDB() {
+    const json = jsonizeCalendar();
+    const response = await fetch("http://f-1.karel.pw:8000/put", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: json});
+    alert("Saved successfully!");
+
 }
 
 
@@ -321,5 +334,9 @@ function addEventListeners() {
             mouseClick = false; // this mouse interaction can no longer be a click
         }
         lastMouse = {x: e.clientX, y: e.clientY};
+    });
+
+    document.getElementById("submit-button").addEventListener("click", e=> {
+        submitCalendarToDB();
     });
 }
