@@ -259,13 +259,14 @@ function resetCalendar() {
 
 async function submitCalendarToDB() {
     const json = jsonizeCalendar();
-    const response = await fetch("http://f-1.karel.pw:8000/put", {
+    const response = await fetch("https://f-1.karel.pw/calendardb/put", {
         method: 'POST',
         mode: 'no-cors',
         headers: {
             'Content-Type': 'application/json'
         },
         body: json});
+    console.log(response);
     alert("Calendar saved successfully!");
 
 }
