@@ -446,7 +446,7 @@ function setupScrollBarFunctionality() {
         const lastX = parseInt(document.getElementById("scroller").style.left) + 21;
         const newX = Math.max(Math.min(e.clientX, doc_width - 21), 21);
         if(_mouseDown) {
-            scrollChildrenSideways(box, lastX - newX);
+            scrollChildrenSideways(box, -1 * (newX - lastX));
             document.getElementById("scroller").style.left = newX - 21 + "px";
         }
     }
