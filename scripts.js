@@ -155,6 +155,8 @@ function createSeasonObject(x, y, label, color) {
     let title = createClassedDivAt(x, y, label, ['seasontitle', 'foreground']);
     let duration = createClassedDivAt(x, y + 20, '', ['seasonduration', 'foreground']);
 
+    title.classList.add("storable-seasonbar");
+
     title.duration = duration;
 
     // set the styles
@@ -280,7 +282,7 @@ function jsonizeCalendar() {
     data.id = query.id;
     data.elements = [];
     // save season bars
-    let elems = document.getElementsByClassName("seasontitle");
+    let elems = document.getElementsByClassName("storable-seasonbar");
     
     for (let elem of elems) {
         let jsonElem = {};
