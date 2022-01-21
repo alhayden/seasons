@@ -138,6 +138,8 @@ function createSeasonInput(x, y) {
 
         // create the replacement <div>s
         if (e.target.value.length > 0) {
+            y = parseInt(e.target.style.top);
+            x = parseInt(e.target.style.left);
             createSeasonObject(x, y, e.target.value, color);
         }
         
@@ -374,12 +376,13 @@ function scrollChildrenSideways(container, amount) {
 function addEventListeners() {
     
     // add listener for mouse scroll wheel use
-    document.getElementById("body").addEventListener("wheel", e => {
+    document.getElementById("calendar-box").addEventListener("wheel", e => {
         if (e.deltaY < 0) {
             scrollChildrenSideways(box, SCROLL_STEP);
         } else {
             scrollChildrenSideways(box, -1 * SCROLL_STEP);
         }
+        e.stopPropagation();
     });
     
     // calendar box -------------------------------------------------------------
