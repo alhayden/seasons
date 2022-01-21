@@ -12,6 +12,8 @@ const DATES = [171, 355]; // June 21,  December 21
 
 const VERTICAL_SPACING = 40;
 
+const query = parse_query_string(window.location.search.substring(1));
+
 /* --- defined in setup() --- */
 let doc_width; 
 let box; // div which holds the whole scrolling calendar
@@ -44,6 +46,30 @@ function setup() {
     createCalendarBackground();
 
 }
+
+// parse the query in the url
+function parse_query_string(query) {
+    let lets = query.split("&");
+    let query_string = {};
+    for (let i = 0; i < lets.length; i++) {
+        let pair = lets[i].split("=");
+        let key = decodeURIComponent(pair[0]);
+        let value = decodeURIComponent(pair[1]);
+        // If first entry with this name
+        if (typeof query_string[key] === "undefined") {
+            query_string[key] = decodeURIComponent(value);
+            // If second entry with this name
+        } else if (typeof query_string[key] === "string") {
+            let arr = [query_string[key], decodeURIComponent(value)];
+            query_string[key] = arr;
+            // If third or later entry with this name
+        } else {
+            query_string[key].push(decodeURIComponent(value));
+        }
+    }
+    return query_string;
+}
+
 
 /* Background graphics -------------------------------- */
 
@@ -216,7 +242,9 @@ function setupSeasonEditability(title) {
 // JSON conversion - data communication
 function jsonizeCalendar() {
     let data = {};
-    data.version = 1;
+    data.version = 2;
+    data.name = document.getElementById("name-input").value;
+    data.id = query.id;
     data.elements = [];
     let elems = document.getElementsByClassName("saveable-object");
     for (let elem of elems) {
@@ -421,7 +449,5 @@ function setupScrollBarFunctionality() {
             scrollChildrenSideways(box, newX - lastX);
             document.getElementById("scroller").style.left = newX - 21 + "px";
         }
-
     }
-
 }
