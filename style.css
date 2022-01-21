@@ -50,6 +50,15 @@ html, body {
     user-select: none;
     cursor: text;
 }
+.seasontitle:hover {
+    font-family: sans;
+    border-width:0px;
+    user-select: none;
+    cursor: text;
+    background-color: #f0f0ff;
+    border-radius:2px;
+    border-bottom: 1px solid #f0f0ff;
+}
 
 .seasonduration {
     height: 16px;

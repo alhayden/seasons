@@ -155,7 +155,6 @@ function createSeasonObject(x, y, label, color) {
     let title = createClassedDivAt(x, y, label, ['seasontitle', 'foreground']);
     let duration = createClassedDivAt(x, y + 20, '', ['seasonduration', 'foreground']);
 
-    title.classList.add("saveable-object");
     title.duration = duration;
 
     // set the styles
@@ -171,6 +170,8 @@ function createSeasonObject(x, y, label, color) {
     setupResizer(resizer1);
     setupResizer(resizer2);
 
+    title.related = [duration];
+
     // editing stuff
     setupSeasonEditability(title);
     setupSeasonEditability(title.twin);
@@ -185,6 +186,7 @@ function createResizerForDuration(duration) {
     resizer.style.marginLeft = (parseInt(duration.style.width) - 4) + "px";
     duration.appendChild(resizer);
     duration.resizer = resizer;
+    duration.related = [resizer];
     return resizer;
 }
 
@@ -211,6 +213,7 @@ function setupResizer(resizer) {
 
 // given a season title, add listeners to create a label editor when it is clicked.
 function setupSeasonEditability(title) {
+    let _mouseover = false;
     title.addEventListener("click", e => {
         const x = parseInt(title.style.left);
         const y = parseInt(title.style.top);
@@ -238,7 +241,35 @@ function setupSeasonEditability(title) {
             e.target.twin.parentNode.removeChild(e.target.twin);
             e.target.parentNode.removeChild(e.target);
         });
+        _mouseover = false;
     });
+
+    
+    title.addEventListener("mouseenter", e => {
+        _mouseover = true;
+    });
+    title.addEventListener("mouseleave", e => {
+        _mouseover = false;
+    });
+    
+    document.addEventListener("keydown", e => {
+        if (_mouseover && (e.keyCode == 46 || e.keyCode == 8)) {
+            removeCalendarElement(title);
+            _mouseover = false;
+            return false;
+        }
+    });
+}
+
+function removeCalendarElement(object) {
+    if (object.related) {
+        for (let obj of object.related) {
+            removeCalendarElement(obj)
+        }
+    }
+
+    object.twin.remove();
+    object.remove();
 }
 
 // JSON conversion - data communication
@@ -248,7 +279,9 @@ function jsonizeCalendar() {
     data.name = document.getElementById("name-input").value;
     data.id = query.id;
     data.elements = [];
-    let elems = document.getElementsByClassName("saveable-object");
+    // save season bars
+    let elems = document.getElementsByClassName("seasontitle");
+    
     for (let elem of elems) {
         let jsonElem = {};
         jsonElem.title = elem.innerText;
