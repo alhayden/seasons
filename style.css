@@ -138,6 +138,13 @@ html, body {
     background-color: #cccccc;
     border-radius:3px;
 }
+.scroller:hover {
+    position: relative;
+    width: 42px;
+    height:16px;
+    background-color: #bbbbbb;
+    border-radius:3px;
+}
 
 .infobox {
     display: flex;
