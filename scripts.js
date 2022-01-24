@@ -33,6 +33,7 @@ let mode = BAR;
 
 let lastMode = BAR;
 
+let listenersInitialized;
 
 /* setup -----------------------------------------------*/
 
@@ -442,6 +443,7 @@ function jsonizeCalendar() {
 
 // load the calendar from a json object
 function calendarFromJson(json) {
+    json = json.replaceAll("\n", "\\n");
     let data = JSON.parse(json);
     for (let elem of data.seasonbars) {
         let title = elem.title;
@@ -624,6 +626,11 @@ function scrollChildrenSideways(container, amount) {
 
 
 function addEventListeners() {
+
+    if(listenersInitialized) {
+        return;
+    }
+    listenersInitialized = true;
     
     // add listener for mouse scroll wheel use
     document.getElementById("calendar-box").addEventListener("wheel", e => {
@@ -707,6 +714,7 @@ function addEventListeners() {
     });*/
 
     setupScrollBarFunctionality();
+    setupResizeability();
 }
 
 function setupScrollBarFunctionality() {
@@ -734,4 +742,15 @@ function setupScrollBarFunctionality() {
             document.getElementById("scroller").style.left = newX - 21 + "px";
         }
     }
+}
+
+function setupResizeability() {
+    window.addEventListener("resize", e => {
+        let json = jsonizeCalendar();
+        while(box.children.length > 0) {
+            box.children[0].remove();
+        }
+        setup();
+        calendarFromJson(json);
+    });
 }
