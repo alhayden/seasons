@@ -292,6 +292,8 @@ function createTextboxObject(x, y) {
     setupTextbox(textbox.twin);
 
     textbox.focus(); // trap the cursor
+
+    return textbox;
 }
 
 function setupTextbox(textbox) {
@@ -407,13 +409,12 @@ function chainedClassListRemove(object, className) {
 // JSON conversion - data communication
 function jsonizeCalendar() {
     let data = {};
-    data.version = 2;
+    data.version = 3;
     data.name = document.getElementById("name-input").value;
     data.id = query.id;
-    data.elements = [];
+    data.seasonbars = [];
     // save season bars
     let elems = document.getElementsByClassName("storable-seasonbar");
-    
     for (let elem of elems) {
         let jsonElem = {};
         jsonElem.title = elem.innerText;
@@ -421,7 +422,20 @@ function jsonizeCalendar() {
         jsonElem.duration = Math.round(parseInt(elem.duration.style.width) / doc_width * 365);
         jsonElem.color = elem.style.color;
         jsonElem.y = Math.round(parseInt(elem.style.top) / VERTICAL_SPACING);
-        data.elements.push(jsonElem);
+        data.seasonbars.push(jsonElem);
+    }
+    
+    data.textboxes = [];
+    elems = document.getElementsByClassName("storable-textbox");
+    for (let elem of elems) {
+        let jsonElem = {};
+        jsonElem.text = elem.value;
+        jsonElem.x =  Math.floor(((((parseInt(elem.style.left) - totalOffset) % doc_width) + doc_width) % doc_width) / doc_width * 365);
+        jsonElem.width = Math.round(parseInt(elem.style.width) / doc_width * 365);
+        jsonElem.height = elem.style.height;
+        jsonElem.color = elem.style.color;
+        jsonElem.y = Math.round(parseInt(elem.style.top) / VERTICAL_SPACING);
+        data.textboxes.push(jsonElem);
     }
     return JSON.stringify(data);
 }
@@ -429,7 +443,7 @@ function jsonizeCalendar() {
 // load the calendar from a json object
 function calendarFromJson(json) {
     let data = JSON.parse(json);
-    for (let elem of data.elements) {
+    for (let elem of data.seasonbars) {
         let title = elem.title;
         let color = elem.color;
         let duration = Math.round(elem.duration / 365 * doc_width);
@@ -438,6 +452,20 @@ function calendarFromJson(json) {
         let seasonObj = createSeasonObject(x, y, title, color);
         twinnedStyle(seasonObj.duration, "width", duration + "px");
         twinnedStyle(seasonObj.duration.resizer, "marginLeft", (duration - 4) + "px");
+    }
+    for (let elem of data.textboxes) {
+        let text = elem.text;
+        let x = Math.round(((((elem.x / 365 * doc_width) + totalOffset) % doc_width) + doc_width) % doc_width);
+        let y = elem.y * VERTICAL_SPACING;
+        let width = Math.round(elem.width / 365 * doc_width);
+        let height = elem.height * VERTICAL_SPACING;
+        let color = elem.color;
+        let boxObj = createTextboxObject(x, y);
+        boxObj.value = text;
+        boxObj.twin.value = text;
+        twinnedStyle(boxObj, "color", color);
+        twinnedStyle(boxObj, "width", width + "px");
+        twinnedStyle(boxObj, "height", height);
     }
 }
 
