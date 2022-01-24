@@ -299,6 +299,8 @@ function createTextboxObject(x, y) {
     textbox.classList.add("storable-textbox")
     twinnedStyle(textbox, 'color', color);
     twinnedStyle(textbox, "borderStyle", 'none');
+    twinnedStyle(textbox, "width", "200px");
+    twinnedStyle(textbox, "height", "32px");
     twinnedStyle(textbox, "maxWidth", doc_width / 2 + "px");
     twinnedStyle(textbox, "maxHeight", (box.getBoundingClientRect().height - y) + "px");
 
