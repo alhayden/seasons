@@ -309,10 +309,12 @@ function setupTextbox(textbox) {
     textbox.addEventListener("mouseenter", e => {
         if (! _editing) {
             e.target.style.backgroundColor = "#f0f0ff";
+            e.target.twin.style.backgroundColor = "#f0f0ff";
         }
     });
     textbox.addEventListener("mouseleave", e => {
         e.target.style.backgroundColor = "";
+        e.target.twin.style.backgroundColor = "";
     });
 
     textbox.addEventListener("mousedown", e => {
@@ -324,15 +326,17 @@ function setupTextbox(textbox) {
         _editing = true;
         enterEditMode();
         e.target.style.backgroundColor = "";
+        e.target.twin.style.backgroundColor = "";
         if(parseInt(e.target.style.left) + parseInt(e.target.style.width) > doc_width) {
             scrollChildrenSideways(box, -1 * (parseInt(e.target.style.left) + parseInt(e.target.style.width) - doc_width));
         }
         if(parseInt(e.target.style.left) < 0) {
-            scrollChildrenSideways(box, -1 * parseInt(e.target.style.left));
+            //scrollChildrenSideways(box, -1 * parseInt(e.target.style.left));
         }
     });
     textbox.addEventListener("focusout", e => {
         e.target.style.backgroundColor = "";
+        e.target.twin.style.backgroundColor = "";
         e.target.twin.value = e.target.value;
         mouseClick = false;
         _editing = false;
