@@ -46,7 +46,6 @@ html, body {
 
 .seasontitle {
     font-family: sans;
-    border-width:0px;
     user-select: none;
     cursor: text;
 }
@@ -183,4 +182,8 @@ html, body {
     font-family: sans;
     font-size: 14px;
     width: 70%;
+}
+
+.deleteselect {
+    box-shadow: 0px 0px 5px red;
 }

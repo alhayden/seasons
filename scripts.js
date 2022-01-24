@@ -49,7 +49,8 @@ function setup() {
     
     // make the background
     createCalendarBackground();
-
+    
+    document.getElementById("bar-button").disabled = true;
 }
 
 // parse the query in the url
@@ -185,7 +186,7 @@ function createSeasonObject(x, y, label, color) {
     setupResizer(resizer1);
     setupResizer(resizer2);
 
-    title.related = [duration];
+    relateObjects(title, duration);
 
     // editing stuff
     setupSeasonEditability(title);
@@ -198,10 +199,11 @@ function createResizerForDuration(duration) {
     let resizer = document.createElement("div");
     resizer.classList.add("seasonresizer");
     resizer.classList.add("foreground");
+    resizer.classList.add("nohighlight");
     resizer.style.marginLeft = (parseInt(duration.style.width) - 4) + "px";
     duration.appendChild(resizer);
     duration.resizer = resizer;
-    duration.related = [resizer];
+    relateObjects(duration, resizer);
     return resizer;
 }
 
@@ -228,7 +230,6 @@ function setupResizer(resizer) {
 
 // given a season title, add listeners to create a label editor when it is clicked.
 function setupSeasonEditability(title) {
-    let _mouseover = false;
     title.addEventListener("click", e => {
         const x = parseInt(title.style.left);
         const y = parseInt(title.style.top);
@@ -260,23 +261,6 @@ function setupSeasonEditability(title) {
             e.target.twin.parentNode.removeChild(e.target.twin);
             e.target.parentNode.removeChild(e.target);
         });
-        _mouseover = false;
-    });
-
-    
-    title.addEventListener("mouseenter", e => {
-        _mouseover = true;
-    });
-    title.addEventListener("mouseleave", e => {
-        _mouseover = false;
-    });
-    
-    document.addEventListener("keydown", e => {
-        if (_mouseover && (e.key == "Delete" || e.key == "Backspace")) {
-            removeCalendarElement(title);
-            _mouseover = false;
-            return false;
-        }
     });
 }
 
@@ -334,6 +318,7 @@ function setupTextbox(textbox) {
     textbox.addEventListener("mousedown", e => {
         e.target.focus();
     });
+
     textbox.addEventListener("focusin", e => {
         mouseClick = false;
         _editing = true;
@@ -348,10 +333,14 @@ function setupTextbox(textbox) {
     });
     textbox.addEventListener("focusout", e => {
         e.target.style.backgroundColor = "";
+        e.target.twin.value = e.target.value;
         mouseClick = false;
         _editing = false;
         e.target.selectionEnd = 0;
         exitEditMode();
+        if (e.target.value == "") {
+            removeCalendarElement(e.target);
+        }
 
     });
     let ro = new ResizeObserver(entries => {
@@ -363,15 +352,52 @@ function setupTextbox(textbox) {
     ro.observe(textbox);
 }
 
+// STUFF THAT'S NOT UI BUT FOR SOME REASON NOT IN UTILITY
+
 function removeCalendarElement(object) {
     if (object.related) {
-        for (let obj of object.related) {
+        let _related = object.related
+        object.related = null;
+        for (let obj of _related) {
+            removeCalendarElement(obj)
+        }
+    }
+    if (object.twin.related) {
+        let _related = object.twin.related
+        object.twin.related = null;
+        for (let obj of _related) {
             removeCalendarElement(obj)
         }
     }
 
     object.twin.remove();
     object.remove();
+}
+
+function chainedClassListAdd(object, className) {
+    if (object.classList.contains(className) || object.classList.contains("nohighlight")) {
+        return;
+    }
+    object.classList.add(className);
+    if (object.related) {
+        for (let obj of object.related) {
+            chainedClassListAdd(obj, className);
+        }
+    }
+    chainedClassListAdd(object.twin, className);
+}
+
+function chainedClassListRemove(object, className) {
+    if (!object.classList.contains(className) || object.classList.contains("nohighlight")) {
+        return;
+    }
+    object.classList.remove(className);
+    if (object.related) {
+        for (let obj of object.related) {
+            chainedClassListRemove(obj, className);
+        }
+    }
+    chainedClassListRemove(object.twin, className);
 }
 
 // JSON conversion - data communication
@@ -436,15 +462,35 @@ async function submitCalendarToDB() {
 
 }
 
-var ro = new ResizeObserver(entries => {
-  for (let entry of entries) {
-    const cr = entry.contentRect;
-    console.log('Element:', entry.target);
-    console.log(`Element size: ${cr.width}px x ${cr.height}px`);
-    console.log(`Element padding: ${cr.top}px ; ${cr.left}px`);
-  }
-});
+function setupDeletability(obj) {
+    if (obj.classList.contains("background")) {
+        return;
+    }
+    obj.addEventListener("mousedown", e => {
+        if (mode == ERASE) {
+            removeCalendarElement(obj);
+            e.stopPropagation();
+        }
+    }, true);
+    obj.addEventListener("mouseenter", e => {
+        if (mode == ERASE) {
+            chainedClassListAdd(e.target, "deleteselect");
+            console.log("highlight");
+        }
+    });
+    obj.addEventListener("mouseleave", e => {
+        if (mode == ERASE) {
+            chainedClassListRemove(e.target, "deleteselect");
+        }
+    });
+}
 
+function clearButtons() {
+    let elems = document.getElementsByClassName("toolbutton");
+    for (let elem of elems) {
+        elem.disabled = false;
+    }
+}
 
 /* Helper Functions -------------------------------- */
 
@@ -477,7 +523,9 @@ function createClassedElementAt(x, y, text, classes, elementType) {
 
 function enterEditMode() {
     lastMode = mode;
-    mode = EDIT;
+    if (mode != ERASE) {
+        mode = EDIT;
+    }
 }
 
 function exitEditMode() {
@@ -485,6 +533,17 @@ function exitEditMode() {
     if (mode == EDIT) {
         mode = BAR;
     }
+}
+
+function relateObjects(a, b) {
+    if(!a.related) {
+        a.related = [];
+    }
+    if(!b.related) {
+        b.related = [];
+    }
+    a.related.push(b);
+    b.related.push(a);
 }
 
 // given an object, insert it into the container at the specified position, and clone it
@@ -504,6 +563,9 @@ function addChildToContainer(container, child, x, y) {
 
     child.twin = extraChild;
     extraChild.twin = child;
+
+    setupDeletability(child);
+    setupDeletability(extraChild);
 }
 
 // translate all of the children of the given container sideways by the given amount
@@ -590,15 +652,27 @@ function addEventListeners() {
     
     document.getElementById("bar-button").addEventListener("click", e => {
         mode = BAR;
+        clearButtons();
+        document.getElementById("bar-button").disabled = true;
     });
     
     document.getElementById("text-button").addEventListener("click", e => {
         mode = TEXT;
+        clearButtons();
+        document.getElementById("text-button").disabled = true;
     });
     
+    document.getElementById("erase-button").addEventListener("click", e => {
+        mode = ERASE;
+        clearButtons();
+        document.getElementById("erase-button").disabled = true;
+    });
+   /*
     document.getElementById("draw-button").addEventListener("click", e => {
         mode = DRAW;
-    });
+        clearButtons();
+        e.target.disabled = true;
+    });*/
 
     setupScrollBarFunctionality();
 }
