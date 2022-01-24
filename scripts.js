@@ -28,6 +28,11 @@ let selectedObject = null;
 // how far the calendar has been scrolled in this session
 let totalOffset = 0;
 
+const BAR = 0; const TEXT = 1; const DRAW = 2; const ERASE = 3; const EDIT = 4;
+let mode = BAR;
+
+let lastMode = BAR;
+
 
 /* setup -----------------------------------------------*/
 
@@ -107,6 +112,10 @@ function createMonthLabel(x, label) {
 
 /* UI ---------------------------------------------- */
 
+
+
+
+// ====== SEASONBAR ======
 function createSeasonInput(x, y) {
 
     // if the input would fall of the screen, scroll the calendar so it fits.
@@ -123,10 +132,12 @@ function createSeasonInput(x, y) {
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
 
+    enterEditMode();
+
     // resize while typing and submit on enter
     naming_box.addEventListener("keydown", e => {
         e.target.twin.value = e.target.value;
-        if (e.keyCode == 13) {
+        if (e.key == "Enter" || e.key == "Escape") {
             e.target.blur();
             return false;
         }
@@ -142,6 +153,8 @@ function createSeasonInput(x, y) {
             x = parseInt(e.target.style.left);
             createSeasonObject(x, y, e.target.value, color);
         }
+
+        exitEditMode();
         
         // remove the inputs
         e.target.twin.parentNode.removeChild(e.target.twin);
@@ -221,14 +234,16 @@ function setupSeasonEditability(title) {
         const y = parseInt(title.style.top);
         let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
         naming_box.value = title.innerText;
+        title.innerText = "";
         naming_box.focus(); // trap the cursor
+        enterEditMode();
 
         mouseClick = false;
 
         // resize while typing and submit on enter
         naming_box.addEventListener("keydown", e => {
             e.target.twin.value = e.target.value;
-            if (e.keyCode == 13) {
+            if (e.key == "Enter" || e.key == "Escape") {
                 e.target.blur();
                 return false;
             }
@@ -238,6 +253,8 @@ function setupSeasonEditability(title) {
             mouseClick = false; // cancel the create new thing event
             title.innerText = e.target.value;
             title.twin.innerText = e.target.value;
+
+            exitEditMode();
             
             // remove the inputs
             e.target.twin.parentNode.removeChild(e.target.twin);
@@ -255,12 +272,74 @@ function setupSeasonEditability(title) {
     });
     
     document.addEventListener("keydown", e => {
-        if (_mouseover && (e.keyCode == 46 || e.keyCode == 8)) {
+        if (_mouseover && (e.key == "Delete" || e.key == "Backspace")) {
             removeCalendarElement(title);
             _mouseover = false;
             return false;
         }
     });
+}
+
+// ====== TEXTBOX ======
+
+function createTextboxObject(x, y) {
+    // if the input would fall of the screen, scroll the calendar so it fits.
+    if (x > doc_width - 175) {
+        scrollChildrenSideways(box, (doc_width - 175) - x);
+        x = doc_width - 175;
+    }
+    y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
+
+    y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
+    y -= 8; // center around pointer
+    y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
+    const color = document.getElementById("color-picker").value;
+    let textbox = createClassedElementAt(x, y, "", ['textarea'], 'textarea');
+
+    textbox.classList.add("storable-textbox")
+    twinnedStyle(textbox, 'color', color);
+
+    setupTextbox(textbox);
+
+    textbox.focus(); // trap the cursor
+}
+
+function setupTextbox(textbox) {
+    let _editing = false;
+    textbox.addEventListener("keydown", e => {
+        e.target.twin.value = e.target.value;
+        if (e.key == "Escape") {
+            e.target.blur();
+        }
+    });
+    textbox.addEventListener("mouseenter", e => {
+        if (! _editing) {
+            e.target.style.backgroundColor = "#f0f0ff";
+        }
+    });
+    textbox.addEventListener("mouseleave", e => {
+        e.target.style.backgroundColor = "";
+    });
+
+    textbox.addEventListener("mousedown", e => {
+        e.target.focus();
+    });
+    textbox.addEventListener("focusin", e => {
+        mouseClick = false;
+        _editing = true;
+        enterEditMode();
+        e.target.style.backgroundColor = "";
+        
+    });
+    textbox.addEventListener("focusout", e => {
+        e.target.style.backgroundColor = "";
+        mouseClick = false;
+        _editing = false;
+        exitEditMode();
+        e.target.style.borderStyle = 'none';
+
+    });
+//    textbox.addEventListener("mousedown")
 }
 
 function removeCalendarElement(object) {
@@ -366,6 +445,18 @@ function createClassedElementAt(x, y, text, classes, elementType) {
     return elem;
 }
 
+function enterEditMode() {
+    lastMode = mode;
+    mode = EDIT;
+}
+
+function exitEditMode() {
+    mode = lastMode;
+    if (mode == EDIT) {
+        mode = BAR;
+    }
+}
+
 // given an object, insert it into the container at the specified position, and clone it
 // for the wrapping functionality.
 function addChildToContainer(container, child, x, y) {
@@ -433,21 +524,27 @@ function addEventListeners() {
     document.getElementById("calendar-box").addEventListener("mouseup", e => {
         if (mouseClick && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) <= MAX_CLICK_DISTANCE) {
             // do a click
-            console.log("click");
-            createSeasonInput(e.clientX, e.clientY);
+            if (mode == BAR) {
+                createSeasonInput(e.clientX, e.clientY);
+            } else if(mode == TEXT) {
+                createTextboxObject(e.clientX, e.clientY);
+            }
         }
         mouseDown = false;
         selectedObject = null;
+        document.body.style.userSelect = 'auto';
     });
 
     // mouse movement handler for the calendar
     document.getElementById("calendar-box").addEventListener("mousemove", e => {
         if (selectedObject) {
             selectedObject.onMouseMove(e);
+            document.body.style.userSelect = 'none';
         }
-        else if (mouseDown && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) >= MAX_CLICK_DISTANCE) {
+        else if (mode != EDIT && mouseDown && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) >= MAX_CLICK_DISTANCE) {
             scrollChildrenSideways(box, e.clientX - lastMouse.x);
             mouseClick = false; // this mouse interaction can no longer be a click
+            document.body.style.userSelect = 'none';
         }
         lastMouse = {x: e.clientX, y: e.clientY};
     });
@@ -460,6 +557,18 @@ function addEventListeners() {
     document.getElementById("reset-button").addEventListener("click", e => {
         resetCalendar();
     });
+    
+    document.getElementById("bar-button").addEventListener("click", e => {
+        mode = BAR;
+    });
+    
+    document.getElementById("text-button").addEventListener("click", e => {
+        mode = TEXT;
+    });
+    
+    document.getElementById("draw-button").addEventListener("click", e => {
+        mode = DRAW;
+    });
 
     setupScrollBarFunctionality();
 }
@@ -469,6 +578,7 @@ function setupScrollBarFunctionality() {
     document.getElementById("scroller").style.left = (doc_width / 2) - 21 + "px";
     
     document.getElementById("scroll-bar").addEventListener("mousedown", e => {
+        document.body.style.userSelect = 'none';
         _mouseDown = true;
         _updateScrollerPositionAndScroll(e);
     });

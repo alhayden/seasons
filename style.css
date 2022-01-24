@@ -78,6 +78,13 @@ html, body {
     overflow: hide;
 }
 
+.textarea {
+    border-width: 1px;
+}
+.textareaTODO:hover{
+    background-color: #f0f0ff;
+}
+
 
 .monthname {
     margin: 2px;
@@ -121,9 +128,12 @@ html, body {
 .buttonsleft {
     display:flex;
     align-items:stretch;
+    width: 30%;
 }
 
 .buttonsright {
+    width: 30%;
+    text-align: right;
 }
 
 .fullheight {
@@ -132,6 +142,11 @@ html, body {
 
 .topbutton {
     font-size:24px;
+}
+
+.toolbutton {
+    margin-left: 1px;
+    margin-right: 1px;
 }
 
 .nameinput {
@@ -169,5 +184,6 @@ html, body {
 
 .instructions {
     font-family: sans;
+    font-size: 14px;
     width: 70%;
 }
