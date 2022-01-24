@@ -312,6 +312,10 @@ function setupTextbox(textbox) {
     let _editing = false;
     textbox.addEventListener("keydown", e => {
         e.target.twin.value = e.target.value;
+        e.target.twin.selectionEnd = 0;
+        if(parseInt(e.target.style.left) + parseInt(e.target.style.width) > doc_width) {
+            scrollChildrenSideways(box, -1 * (parseInt(e.target.style.left) + parseInt(e.target.style.width) - doc_width));
+        }
         if (e.key == "Escape") {
             e.target.blur();
         }
@@ -333,12 +337,18 @@ function setupTextbox(textbox) {
         _editing = true;
         enterEditMode();
         e.target.style.backgroundColor = "";
-        
+        if(parseInt(e.target.style.left) + parseInt(e.target.style.width) > doc_width) {
+            scrollChildrenSideways(box, -1 * (parseInt(e.target.style.left) + parseInt(e.target.style.width) - doc_width));
+        }
+        if(parseInt(e.target.style.left) < 0) {
+            scrollChildrenSideways(box, -1 * parseInt(e.target.style.left));
+        }
     });
     textbox.addEventListener("focusout", e => {
         e.target.style.backgroundColor = "";
         mouseClick = false;
         _editing = false;
+        e.target.selectionEnd = 0;
         exitEditMode();
 
     });
