@@ -328,14 +328,6 @@ function setupTextbox(textbox) {
     textbox.addEventListener("mousedown", e => {
         e.target.focus();
     });
-    textbox.addEventListener("mouseup", e => {
-        e.target.twin.style.width = e.target.style.width;
-        e.target.twin.style.height= e.target.style.height;
-    });
-    textbox.addEventListener("mousemove", e => {
-        e.target.twin.style.width = e.target.style.width;
-        e.target.twin.style.height= e.target.style.height;
-    });
     textbox.addEventListener("focusin", e => {
         mouseClick = false;
         _editing = true;
@@ -350,7 +342,13 @@ function setupTextbox(textbox) {
         exitEditMode();
 
     });
-//    textbox.addEventListener("mousedown")
+    let ro = new ResizeObserver(entries => {
+    for (let entry of entries) {
+        entry.target.twin.style.width = entry.target.style.width;
+        entry.target.twin.style.height = entry.target.style.height
+     }
+    });
+    ro.observe(textbox);
 }
 
 function removeCalendarElement(object) {
@@ -425,6 +423,15 @@ async function submitCalendarToDB() {
     alert("Calendar saved successfully!");
 
 }
+
+var ro = new ResizeObserver(entries => {
+  for (let entry of entries) {
+    const cr = entry.contentRect;
+    console.log('Element:', entry.target);
+    console.log(`Element size: ${cr.width}px x ${cr.height}px`);
+    console.log(`Element padding: ${cr.top}px ; ${cr.left}px`);
+  }
+});
 
 
 /* Helper Functions -------------------------------- */
