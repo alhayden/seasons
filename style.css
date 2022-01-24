@@ -4,6 +4,7 @@ html, body {
     margin: 0px;
 
     background-color: #ffffff;
+    font-family: sans;
 
     max-width:100%;
     overflow-x:hidden;
@@ -63,6 +64,7 @@ html, body {
     height: 16px;
     width: 4px;
     text-align: right;
+    border-right: 1px solid #000000;
 }
 
 .seasonresizer {
@@ -187,3 +189,40 @@ html, body {
 .deleteselect {
     box-shadow: 0px 0px 5px red;
 }
+
+.starterinfo {
+    width: 80%;
+    height: 80%;
+    top: 50%;
+    left: 50%;
+    z-index: 40;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background-color: #fafafa;
+    border: 2px solid #606060;
+    border-radius:10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.info {
+    width: 80%;
+    margin: 10px auto;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    text-align: left;
+}
+
+.infoicon {
+    margin: 10px;
+    width: 18px;
+}
+
+.okaybutton {
+    font-size: 16px;
+    padding: 10px 30px;
+}
+

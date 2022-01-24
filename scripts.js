@@ -713,6 +713,10 @@ function addEventListeners() {
         e.target.disabled = true;
     });*/
 
+    document.getElementById("okay-button").addEventListener("click", e => {
+        document.getElementById("starter-info").remove();
+    });
+
     setupScrollBarFunctionality();
     setupResizeability();
 }
