@@ -1,12 +1,12 @@
 <html>
-	<head>
+    <head>
         <meta charset=UTF-8>
         <link rel="stylesheet" href="style.css">
         <script src="scripts.js"></script>
 
 
-	</head>
-	<body id="body">
+    </head>
+    <body id="body">
         <div class="buttonbar">
             <div class="buttonsleft">
                 <input type="color" id="color-picker" value="#999fff" title="Select a color" class="fullheight">
@@ -29,37 +29,37 @@
         <button id="submit-button" class="submitbutton" title="Submit this completed calendar to the researchers" >Submit</button>
         <div class="infobox">
             <div></div>
-            <div class="instructions">Choose a color to represent a season or event of significance. Click where you think it begins, create a name for it, and drag the bar to the length you feel represents it. Seasons can overlap and you can add as many as you see fit. Fill in what best represents your year.<br>When you press submit, only the information you entered in the calendar above is sent to our servers.  We do not collect any other information.</div>
-        <div></div>
+            <div class="instructions">When you press submit, only the information you entered in the calendar above is sent to our servers.  We do not collect any other information.</div>
+            <div></div>
         </div>
         <div id="starter-info" class="starterinfo">
             <div class="info">
-                <div id="infoicon">
-                    <img src="bar.svg">
+                <img class="infoicon" src="color-icon.png">
+                <div>
+                    Choose a color to represent a season or event of significance.
                 </div>
+            </div>
+            <div class="info">
+                <img class="infoicon" src="bar.svg">
                 <div>
                     Use the Season Bar tool to add seasons to the calendar.  Click where you want to create one, type a label for it, and resize the bar to the length you want.
                 </div>
             </div>
             <div class="info">
-                <div id="infoicon">
-                    <img src="text.svg">
-                </div>
+                <img class="infoicon" src="text.svg">
                 <div>
                     You can use the Text Box tool to add text to the calendar.
                 </div>
             </div>
             <div class="info">
-                <div id="infoicon">
-                    <img src="eraser.svg">
-                </div>
+                <img class="infoicon" src="eraser.svg">
                 <div>
                     You can use the Erase tool to remove elements from your calendar.
-                 </div>
+                </div>
             </div>
             <div class="okaybox">
                 <button id="okay-button" class="okaybutton">Got it!</button>
             </div>
         </div>
-	</body>
+    </body>
 </html>
