@@ -78,14 +78,6 @@ html, body {
     overflow: hide;
 }
 
-.textarea {
-    border-width: 1px;
-}
-.textareaTODO:hover{
-    background-color: #f0f0ff;
-}
-
-
 .monthname {
     margin: 2px;
     margin-left: 8px;

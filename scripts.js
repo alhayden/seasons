@@ -298,8 +298,12 @@ function createTextboxObject(x, y) {
 
     textbox.classList.add("storable-textbox")
     twinnedStyle(textbox, 'color', color);
+    twinnedStyle(textbox, "borderStyle", 'none');
+    twinnedStyle(textbox, "maxWidth", doc_width / 2 + "px");
+    twinnedStyle(textbox, "maxHeight", (box.getBoundingClientRect().height - y) + "px");
 
     setupTextbox(textbox);
+    setupTextbox(textbox.twin);
 
     textbox.focus(); // trap the cursor
 }
@@ -324,6 +328,14 @@ function setupTextbox(textbox) {
     textbox.addEventListener("mousedown", e => {
         e.target.focus();
     });
+    textbox.addEventListener("mouseup", e => {
+        e.target.twin.style.width = e.target.style.width;
+        e.target.twin.style.height= e.target.style.height;
+    });
+    textbox.addEventListener("mousemove", e => {
+        e.target.twin.style.width = e.target.style.width;
+        e.target.twin.style.height= e.target.style.height;
+    });
     textbox.addEventListener("focusin", e => {
         mouseClick = false;
         _editing = true;
@@ -336,7 +348,6 @@ function setupTextbox(textbox) {
         mouseClick = false;
         _editing = false;
         exitEditMode();
-        e.target.style.borderStyle = 'none';
 
     });
 //    textbox.addEventListener("mousedown")
