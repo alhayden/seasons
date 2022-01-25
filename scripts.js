@@ -28,10 +28,10 @@ let selectedObject = null;
 // how far the calendar has been scrolled in this session
 let totalOffset = 0;
 
-const BAR = 0; const TEXT = 1; const DRAW = 2; const ERASE = 3; const EDIT = 4;
-let mode = BAR;
+const POINT = 0; const BAR = 1; const TEXT = 2; const DRAW = 3; const ERASE = 4; const EDIT = 5;
+let mode = POINT;
 
-let lastMode = BAR;
+let lastMode = POINT;
 
 let listenersInitialized;
 
@@ -50,8 +50,10 @@ function setup() {
     
     // make the background
     createCalendarBackground();
+
+    setupGhosts();
     
-    document.getElementById("bar-button").disabled = true;
+    document.getElementById("pointer-button").disabled = true;
 }
 
 // parse the query in the url
@@ -125,9 +127,9 @@ function createSeasonInput(x, y) {
         scrollChildrenSideways(box, (doc_width - 175) - x);
         x = doc_width - 175;
     }
-    y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
 
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
+    y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
     y -= 8; // center around pointer
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
     const color = document.getElementById("color-picker").value;
@@ -273,9 +275,9 @@ function createTextboxObject(x, y) {
         scrollChildrenSideways(box, (doc_width - 175) - x);
         x = doc_width - 175;
     }
-    y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
-
+    
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
+    y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
     y -= 8; // center around pointer
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
     const color = document.getElementById("color-picker").value;
@@ -311,8 +313,8 @@ function setupTextbox(textbox) {
     });
     textbox.addEventListener("mouseenter", e => {
         if (! _editing) {
-            e.target.style.backgroundColor = "#f0f0ff";
-            e.target.twin.style.backgroundColor = "#f0f0ff";
+            e.target.style.backgroundColor = "#f0f0ffa0";
+            e.target.twin.style.backgroundColor = "#f0f0ffa0";
         }
     });
     textbox.addEventListener("mouseleave", e => {
@@ -524,6 +526,63 @@ function clearButtons() {
     for (let elem of elems) {
         elem.disabled = false;
     }
+
+}
+
+
+let ghostBar;
+let ghostBarTitle;
+let ghostText;
+
+function setupGhosts() {
+    ghostBar = document.createElement("div");
+    ghostBarTitle = document.createElement("div");
+    ghostBar.classList.add("seasondurationghost");
+    ghostBarTitle.classList.add("seasontitleghost");
+    box.appendChild(ghostBar);
+    box.appendChild(ghostBarTitle);
+
+    ghostText = document.createElement("div");
+    ghostText.classList.add("textareaghost");
+    box.appendChild(ghostText);
+}
+
+function handleGhosts(x, y) {
+    let _draw = true;
+    if (selectedObject || x < 0 || y < 0) {
+        _draw = false;
+    }
+
+    if (mode == BAR && _draw) {
+        y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
+        y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
+        y -= 8; // center around pointer
+        y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
+        ghostBarTitle.style.left = x + "px";
+        ghostBarTitle.style.top = (y - 16) + "px";
+        ghostBarTitle.style.display = "block";
+        
+        ghostBar.style.left = x + "px";
+        ghostBar.style.top = (y + 20) + "px";
+        ghostBar.style.display = "block";
+        
+    } else {
+        ghostBar.style.display = "none";
+        ghostBarTitle.style.display = "none";
+    }
+    if(mode == TEXT && _draw) {
+        y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
+        y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
+        y -= 8; // center around pointer
+        y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
+        ghostText.style.left = x + "px";
+        ghostText.style.top = y + "px";
+        ghostText.style.display = "block";
+        console.log("think");
+        
+    } else {
+        ghostText.style.display = "none";
+    }
 }
 
 /* Helper Functions -------------------------------- */
@@ -649,6 +708,7 @@ function addEventListeners() {
         startMouse = {x: e.clientX, y: e.clientY};
         mouseDown = true;
         mouseClick = true;
+        handleGhosts(-1, -1);
     });
 
     // mouse up handler for the calendar
@@ -678,6 +738,11 @@ function addEventListeners() {
             document.body.style.userSelect = 'none';
         }
         lastMouse = {x: e.clientX, y: e.clientY};
+        handleGhosts(e.clientX, e.clientY);
+    });
+
+    document.getElementById("calendar-box").addEventListener("mouseleave", e => {
+        handleGhosts(-1, -1);
     });
 
     // submit button ----------------------------------------------------------
@@ -689,6 +754,12 @@ function addEventListeners() {
         resetCalendar();
     });
     
+    document.getElementById("pointer-button").addEventListener("click", e => {
+        mode = POINT;
+        clearButtons();
+        document.getElementById("pointer-button").disabled = true;
+    });
+
     document.getElementById("bar-button").addEventListener("click", e => {
         mode = BAR;
         clearButtons();

@@ -55,9 +55,9 @@ html, body {
     border-width:0px;
     user-select: none;
     cursor: text;
-    background-color: #f0f0ff;
+    background-color: #f0f0ffa0;
     border-radius:2px;
-    border-bottom: 1px solid #f0f0ff;
+    border-bottom: 1px solid #f0f0ffa0;
 }
 
 .seasonduration {
@@ -65,6 +65,25 @@ html, body {
     width: 4px;
     text-align: right;
     border-right: 1px solid #000000;
+}
+
+.seasontitleghost {
+    background: #00000020;
+    height: 20px;
+    width: 175px;
+    border-radius: 5px;
+    z-index: 0;
+    display: none;
+    position: relative;
+}
+
+.seasondurationghost {
+    background: #00000020;
+    width: 4px;
+    height: 16px;
+    z-index: 0;
+    display: none;
+    position: relative;
 }
 
 .seasonresizer {
@@ -82,6 +101,16 @@ html, body {
 .textarea {
     width: 178px;
     height:32px;
+}
+
+.textareaghost {
+    background: #00000020;
+    width: 200px;
+    height: 32px;
+    border-radius:5px;
+    z-index: 0;
+    position: relative;
+    display: none;
 }
 
 .monthname {
@@ -214,6 +243,10 @@ html, body {
     flex-direction: row;
     gap: 10px;
     text-align: left;
+}
+
+.center {
+    text-align: center;
 }
 
 .infoicon {
