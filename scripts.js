@@ -578,7 +578,6 @@ function handleGhosts(x, y) {
         ghostText.style.left = x + "px";
         ghostText.style.top = y + "px";
         ghostText.style.display = "block";
-        console.log("think");
         
     } else {
         ghostText.style.display = "none";
