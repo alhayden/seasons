@@ -249,6 +249,10 @@ html, body {
     text-align: center;
 }
 
+.centerimg {
+    margin: auto;
+}
+
 .infoicon {
     margin-left: 10px;
     width: 44px;
