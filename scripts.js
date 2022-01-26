@@ -613,13 +613,15 @@ function createClassedElementAt(x, y, text, classes, elementType) {
     return elem;
 }
 
+// bring the user int mode = EDIT, while storing previous mode
 function enterEditMode() {
     lastMode = mode;
-    if (mode != ERASE) {
+    if (mode != ERASE) { // we don't allow editing in ERASE mode, only erasing
         mode = EDIT;
     }
 }
 
+// return the user to the mode they were in before entering EDIT mode
 function exitEditMode() {
     mode = lastMode;
     if (mode == EDIT) {
@@ -627,6 +629,8 @@ function exitEditMode() {
     }
 }
 
+// create references between to elements to mark them as part of the same UI object
+// used when deleting and highlighting multi-element objects
 function relateObjects(a, b) {
     if(!a.related) {
         a.related = [];
@@ -682,10 +686,10 @@ function scrollChildrenSideways(container, amount) {
     }
 }
 
-
+// add event listeners to th elements in the document
 function addEventListeners() {
 
-    if(listenersInitialized) {
+    if(listenersInitialized) { // this function should only be called once per page load
         return;
     }
     listenersInitialized = true;

@@ -46,12 +46,10 @@ html, body {
 }
 
 .seasontitle {
-    font-family: sans;
     user-select: none;
     cursor: text;
 }
 .seasontitle:hover {
-    font-family: sans;
     border-width:0px;
     user-select: none;
     cursor: text;
@@ -93,7 +91,6 @@ html, body {
 }
 
 .seasoninput {
-    font-family: sans;
     background: #ffffff;
     overflow: hide;
 }
@@ -117,7 +114,6 @@ html, body {
     margin: 2px;
     margin-left: 8px;
     color: #d0d0d0;
-    font-family: sans;
 }
 
 .datelabel {
@@ -126,7 +122,6 @@ html, body {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     color: #d0d0d0;
-    font-family: sans;
 }
 
 .background {
@@ -177,7 +172,6 @@ html, body {
 }
 
 .nameinput {
-    font-family: sans;
     text-align: center;
     font-size:16px;
 }
@@ -210,7 +204,6 @@ html, body {
 }
 
 .instructions {
-    font-family: sans;
     font-size: 14px;
     width: 70%;
 }
