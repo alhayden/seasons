@@ -34,6 +34,7 @@ let mode = POINT;
 let lastMode = POINT;
 
 let listenersInitialized;
+let helpNodes;
 
 /* setup -----------------------------------------------*/
 
@@ -127,18 +128,19 @@ function createSeasonInput(x, y) {
         scrollChildrenSideways(box, (doc_width - 175) - x);
         x = doc_width - 175;
     }
-
+    
+    // get the y position
     y = y - box.getBoundingClientRect().top; // align y to calendar frame of reference
     y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
     y -= 8; // center around pointer
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
-    const color = document.getElementById("color-picker").value;
+    const color = document.getElementById("color-picker").value; // get the selected color
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
 
     enterEditMode();
 
-    // resize while typing and submit on enter
+    // copy value to twin while typing and save on enter or escape
     naming_box.addEventListener("keydown", e => {
         e.target.twin.value = e.target.value;
         if (e.key == "Enter" || e.key == "Escape") {
@@ -153,9 +155,9 @@ function createSeasonInput(x, y) {
 
         // create the replacement <div>s
         if (e.target.value.length > 0) {
-            y = parseInt(e.target.style.top);
+            y = parseInt(e.target.style.top); // get the position
             x = parseInt(e.target.style.left);
-            createSeasonObject(x, y, e.target.value, color);
+            createSeasonObject(x, y, e.target.value, color);  // create the div
         }
 
         exitEditMode();
@@ -197,7 +199,7 @@ function createSeasonObject(x, y, label, color) {
     return title;
 }
 
-// generate resizder objects for a duration maker
+// generate resizer objects for a duration maker
 function createResizerForDuration(duration) {
     let resizer = document.createElement("div");
     resizer.classList.add("seasonresizer");
@@ -676,7 +678,7 @@ function scrollChildrenSideways(container, amount) {
         // move the object
         let currX = parseInt(i.style.left);
         currX += amount;
-        if (currX > doc_width * 1) {
+        if (currX > doc_width * 1) { // wrap around the edges of the document
             currX -= doc_width * 2;
         } else if (currX < doc_width * -1) {
             currX += doc_width * 2;
@@ -717,7 +719,8 @@ function addEventListeners() {
     // mouse up handler for the calendar
     document.getElementById("calendar-box").addEventListener("mouseup", e => {
         if (mouseClick && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) <= MAX_CLICK_DISTANCE) {
-            // do a click
+            // when the mouse can be clicked and the mouse has moved less than the click
+            // distance threshold, do a click
             if (mode == BAR) {
                 createSeasonInput(e.clientX, e.clientY);
             } else if(mode == TEXT) {
@@ -731,11 +734,13 @@ function addEventListeners() {
 
     // mouse movement handler for the calendar
     document.getElementById("calendar-box").addEventListener("mousemove", e => {
-        if (selectedObject) {
+        if (selectedObject) {   // handle dragged items
             selectedObject.onMouseMove(e);
             document.body.style.userSelect = 'none';
         }
         else if (mode != EDIT && mouseDown && Math.pow(startMouse.x - e.clientX, 2) + Math.pow(startMouse.y - e.clientY, 2) >= MAX_CLICK_DISTANCE) {
+            // when edit mode is not active, the mouse is down
+            // and the mouse has moved far enough that it's not a click
             scrollChildrenSideways(box, e.clientX - lastMouse.x);
             mouseClick = false; // this mouse interaction can no longer be a click
             document.body.style.userSelect = 'none';
@@ -743,7 +748,8 @@ function addEventListeners() {
         lastMouse = {x: e.clientX, y: e.clientY};
         handleGhosts(e.clientX, e.clientY);
     });
-
+    
+    // hide the ghosts when the mouse leaves the calendar box
     document.getElementById("calendar-box").addEventListener("mouseleave", e => {
         handleGhosts(-1, -1);
     });
@@ -752,29 +758,35 @@ function addEventListeners() {
     document.getElementById("submit-button").addEventListener("click", e => {
         submitCalendarToDB();
     });
-
+    // reset button
     document.getElementById("reset-button").addEventListener("click", e => {
         resetCalendar();
     });
-    
+    // help button
+    document.getElementById("help-button").addEventListener("click", e => {
+        if (helpNodes) {
+            document.body.appendChild(helpNodes);
+        }
+    });
+    // pointer tool button
     document.getElementById("pointer-button").addEventListener("click", e => {
         mode = POINT;
         clearButtons();
         document.getElementById("pointer-button").disabled = true;
     });
-
+    // calendar bar tool button
     document.getElementById("bar-button").addEventListener("click", e => {
         mode = BAR;
         clearButtons();
         document.getElementById("bar-button").disabled = true;
     });
-    
+    // calendar text tool button
     document.getElementById("text-button").addEventListener("click", e => {
         mode = TEXT;
         clearButtons();
         document.getElementById("text-button").disabled = true;
     });
-    
+    // erase tool button
     document.getElementById("erase-button").addEventListener("click", e => {
         mode = ERASE;
         clearButtons();
@@ -788,26 +800,35 @@ function addEventListeners() {
     });*/
 
     document.getElementById("okay-button").addEventListener("click", e => {
-        document.getElementById("starter-info").remove();
+        // close the help window when the button is pressed
+        helpNodes = document.getElementById("starter-info");
+        helpNodes.remove();
     });
 
-    setupScrollBarFunctionality();
-    setupResizeability();
+    setupScrollBarFunctionality();  // make the scroll bar below the calendar work
+    setupResizeability();   // add the window resize handler
 }
 
+// configure the scroll bar to move the calendar left and right
 function setupScrollBarFunctionality() {
     let _mouseDown = false;
+    // place scroll bar in right place
     document.getElementById("scroller").style.left = (doc_width / 2) - 21 + "px";
     
+    // detect when the bar is clicked
     document.getElementById("scroll-bar").addEventListener("mousedown", e => {
         document.body.style.userSelect = 'none';
         _mouseDown = true;
         _updateScrollerPositionAndScroll(e);
     });
+
+    // detect when the user lets go of the bar
     document.getElementById("body").addEventListener("mouseup", e => {
         _mouseDown = false;
         document.getElementById("scroller").style.left = (doc_width / 2) - 21 + "px";
     });
+
+    // detect when th mouse is moved
     document.getElementById("body").addEventListener("mousemove", e => {
         _updateScrollerPositionAndScroll(e);
     });
@@ -815,20 +836,21 @@ function setupScrollBarFunctionality() {
     function _updateScrollerPositionAndScroll(e) {
         const lastX = parseInt(document.getElementById("scroller").style.left) + 21;
         const newX = Math.max(Math.min(e.clientX, doc_width - 21), 21);
-        if(_mouseDown) {
+        if(_mouseDown) {    // if the mouse is down, scroll the calendar
             scrollChildrenSideways(box, -1 * (newX - lastX));
             document.getElementById("scroller").style.left = newX - 21 + "px";
         }
     }
 }
 
+// handler to make sure the document changes properly when the window is resized
 function setupResizeability() {
     window.addEventListener("resize", e => {
-        let json = jsonizeCalendar();
-        while(box.children.length > 0) {
+        let json = jsonizeCalendar();   // save the whole calendar
+        while(box.children.length > 0) {    // delete the calendar
             box.children[0].remove();
         }
-        setup();
-        calendarFromJson(json);
+        setup();    // remake the calendar
+        calendarFromJson(json); // load the objects back in
     });
 }
