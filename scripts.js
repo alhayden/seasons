@@ -135,6 +135,7 @@ function createSeasonInput(x, y) {
     y -= 8; // center around pointer
     y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
     const color = document.getElementById("color-picker").value; // get the selected color
+    let season_object = createSeasonObject(x, y, "", color);  // create the div
     let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
     naming_box.focus(); // trap the cursor
 
@@ -153,12 +154,9 @@ function createSeasonInput(x, y) {
     naming_box.addEventListener("focusout", e => {
         mouseClick = false; // cancel the create new thing event
 
-        // create the replacement <div>s
-        if (e.target.value.length > 0) {
-            y = parseInt(e.target.style.top); // get the position
-            x = parseInt(e.target.style.left);
-            createSeasonObject(x, y, e.target.value, color);  // create the div
-        }
+        // update the replacement div
+        season_object.innerText = e.target.value;
+        season_object.twin.innerText = e.target.value;
 
         exitEditMode();
         
@@ -235,7 +233,7 @@ function setupResizer(resizer) {
 
 // given a season title, add listeners to create a label editor when it is clicked.
 function setupSeasonEditability(title) {
-    title.addEventListener("click", e => {
+    title.addEventListener("mousedown", e => {
         const x = parseInt(title.style.left);
         const y = parseInt(title.style.top);
         let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
@@ -245,6 +243,7 @@ function setupSeasonEditability(title) {
         enterEditMode();
 
         mouseClick = false;
+        e.preventDefault();
 
         // resize while typing and submit on enter
         naming_box.addEventListener("keydown", e => {
@@ -483,10 +482,16 @@ function clearCalendar() {
 }
 
 function resetCalendar() {
-    window.location.reload();
+    while(box.children.length > 0) {    // delete the calendar
+        box.children[0].remove();
+    }
+    setup();    // remake the calendar
 }
 
 async function submitCalendarToDB() {
+    const button = document.getElementById("submit-button");
+    button.innerText = "submitting...";
+    button.disabled = true;
     const json = jsonizeCalendar();
     const response = await fetch("https://f-1.karel.pw/calendardb/put", {
         method: 'POST',
@@ -495,6 +500,8 @@ async function submitCalendarToDB() {
             'Content-Type': 'application/json'
         },
         body: json});
+    button.disabled = false;
+    button.innerText ='Submit';
     console.log(response);
     alert("Calendar saved successfully!");
 

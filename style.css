@@ -48,6 +48,8 @@ html, body {
 .seasontitle {
     user-select: none;
     cursor: text;
+    min-width: 32px;
+    min-height: 19px;
 }
 .seasontitle:hover {
     border-width:0px;
