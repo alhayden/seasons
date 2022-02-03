@@ -50,6 +50,7 @@ html, body {
     cursor: text;
     min-width: 32px;
     min-height: 19px;
+    text-align: left;
 }
 .seasontitle:hover {
     border-width:0px;
