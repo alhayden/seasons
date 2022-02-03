@@ -234,6 +234,9 @@ function setupResizer(resizer) {
 // given a season title, add listeners to create a label editor when it is clicked.
 function setupSeasonEditability(title) {
     title.addEventListener("mousedown", e => {
+        if (mode == ERASE) {
+            return;
+        }
         const x = parseInt(title.style.left);
         const y = parseInt(title.style.top);
         let naming_box = createClassedElementAt(x, y, "", ['seasoninput'], 'input');
