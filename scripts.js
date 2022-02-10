@@ -177,7 +177,7 @@ function createSeasonObject(x, y, label, color) {
     title.duration = duration;
 
     // set the styles
-    twinnedStyle(title, "color", color);
+    twinnedStyle(title, "color", "#000000");
     twinnedStyle(duration, "backgroundColor", color);
     twinnedStyle(duration, "width", "4px");
     
@@ -427,7 +427,7 @@ function jsonizeCalendar() {
         jsonElem.title = elem.innerText;
         jsonElem.start =  Math.floor(((((parseInt(elem.style.left) - totalOffset) % doc_width) + doc_width) % doc_width) / doc_width * 365);
         jsonElem.duration = Math.round(parseInt(elem.duration.style.width) / doc_width * 365);
-        jsonElem.color = elem.style.color;
+        jsonElem.color = elem.duration.style.backgroundColor;
         jsonElem.y = Math.round(parseInt(elem.style.top) / VERTICAL_SPACING);
         data.seasonbars.push(jsonElem);
     }
