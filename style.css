@@ -162,6 +162,9 @@ button {
 
 .buttonsright {
     width: 30%;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
     text-align: right;
 }
 
@@ -181,6 +184,10 @@ button {
 .nameinput {
     text-align: center;
     font-size:16px;
+}
+
+.jsoninput {
+    
 }
 
 .scrollbar {

@@ -475,6 +475,16 @@ function calendarFromJson(json) {
         twinnedStyle(boxObj, "width", width + "px");
         twinnedStyle(boxObj, "height", height);
     }
+
+    document.getElementById("name-input").value = data.name;
+
+    scrollChildrenSideways(box, 1);
+    scrollChildrenSideways(box, -1);
+}
+
+function fixAndLoadJSON (json) {
+    const clean_json = json.replaceAll("'", '"');
+    calendarFromJson(clean_json);
 }
 
 function clearCalendar() {
@@ -538,9 +548,7 @@ function clearButtons() {
     for (let elem of elems) {
         elem.disabled = false;
     }
-
 }
-
 
 let ghostBar;
 let ghostBarTitle;
@@ -816,6 +824,7 @@ function addEventListeners() {
     });
 
     setupScrollBarFunctionality();  // make the scroll bar below the calendar work
+    setupJSONInput();
     setupResizeability();   // add the window resize handler
 }
 
@@ -850,6 +859,24 @@ function setupScrollBarFunctionality() {
             scrollChildrenSideways(box, -1 * (newX - lastX));
             document.getElementById("scroller").style.left = newX - 21 + "px";
         }
+    }
+}
+
+function setupJSONInput() {
+    let input = document.getElementById("json-input");
+    
+    input.addEventListener("keydown", e => {
+        if (e.key == "Escape" || e.key == "Enter") {
+            e.target.blur();
+        }
+    });
+
+    input.addEventListener("focusout", e => {
+        fixAndLoadJSON(e.target.value);
+    });
+
+    if (query.id) {
+        input.remove();
     }
 }
 
