@@ -873,6 +873,7 @@ function setupJSONInput() {
 
     input.addEventListener("focusout", e => {
         fixAndLoadJSON(e.target.value);
+        e.target.value = "";
     });
 
     if (query.id) {
