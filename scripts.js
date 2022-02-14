@@ -46,6 +46,8 @@ function setup() {
     // get window width
     doc_width = document.innerWidth || document.body.clientWidth;
 
+    totalOffset = 0;
+
     // set up the event listeners (for user input)
     addEventListeners();
     
