@@ -28,9 +28,9 @@ let selectedObject = null;
 // how far the calendar has been scrolled in this session
 let totalOffset = 0;
 
-const POINT = 0; const BAR = 1; const TEXT = 2; const DRAW = 3; const ERASE = 4; const EDIT = 5;
-let mode = POINT;
+const POINT = 0; const BAR = 1; const TEXT = 2; const DRAW = 3; const ERASE = 4; const EDIT = 5; const MOVE_V = 6;
 
+let mode = POINT;
 let lastMode = POINT;
 
 let listenersInitialized;
@@ -55,6 +55,10 @@ function setup() {
     createCalendarBackground();
 
     setupGhosts();
+
+    while (query.id && document.getElementsByClassName("advanced").length > 0) {
+        document.getElementsByClassName("advanced")[0].remove();
+    }
     
     document.getElementById("pointer-button").disabled = true;
 }
@@ -415,6 +419,16 @@ function chainedClassListRemove(object, className) {
     chainedClassListRemove(object.twin, className);
 }
 
+function chainedStyleEditDelta(object, attribute, delta) {
+    const tmc = "temporary_marker_class";
+    chainedClassListAdd(object, tmc);
+    for(let o of document.getElementsByClassName(tmc)) {
+        let n = parseInt(o.style[attribute]);
+        o.style[attribute] = n + delta + "px";
+    }
+    chainedClassListRemove(object, tmc);
+}
+
 // JSON conversion - data communication
 function jsonizeCalendar() {
     let data = {};
@@ -522,7 +536,7 @@ async function submitCalendarToDB() {
 
 }
 
-function setupDeletability(obj) {
+function setupEditability(obj) {
     if (obj.classList.contains("background")) {
         return;
     }
@@ -531,16 +545,41 @@ function setupDeletability(obj) {
             removeCalendarElement(obj);
             e.stopPropagation();
         }
+        if (mode == MOVE_V) {
+            e.stopPropagation();
+            e.preventDefault();
+            selectedObject = obj;
+            let delta = parseInt(obj.style.top) - e.clientY + box.getBoundingClientRect().top;
+            let lastY = parseInt(obj.style.top);
+            mouseDown = true;
+            obj.onMouseMove = e => {
+                if (mouseDown) {
+                    let y = e.clientY - delta - box.getBoundingClientRect().top; // align y to calendar frame of reference
+                    y = Math.min(y, Math.round(box.getBoundingClientRect().height) - VERTICAL_SPACING);
+                    y = Math.round(y / VERTICAL_SPACING) * VERTICAL_SPACING; // align to grid
+                    // drag to change the Y position of the object
+                    chainedStyleEditDelta(obj, "top", y - lastY);
+                    lastY = y;
+//                    twinnedStyle(obj, "top", y + "px");
+                }
+            }
+        }
     }, true);
     obj.addEventListener("mouseenter", e => {
         if (mode == ERASE) {
             chainedClassListAdd(e.target, "deleteselect");
             console.log("highlight");
         }
+        if (mode == MOVE_V) {
+            chainedClassListAdd(e.target, "normalselect");
+        }
     });
     obj.addEventListener("mouseleave", e => {
         if (mode == ERASE) {
             chainedClassListRemove(e.target, "deleteselect");
+        }
+        if (mode == MOVE_V) {
+            chainedClassListRemove(e.target, "normalselect");
         }
     });
 }
@@ -682,8 +721,8 @@ function addChildToContainer(container, child, x, y) {
     child.twin = extraChild;
     extraChild.twin = child;
 
-    setupDeletability(child);
-    setupDeletability(extraChild);
+    setupEditability(child);
+    setupEditability(extraChild);
 }
 
 // translate all of the children of the given container sideways by the given amount
@@ -819,6 +858,14 @@ function addEventListeners() {
         e.target.disabled = true;
     });*/
 
+    /* ADVANCED TOOLS */
+    // vertical move tool button
+    document.getElementById("move-v-button").addEventListener("click", e => {
+        mode = MOVE_V;
+        clearButtons();
+        document.getElementById("move-v-button").disabled = true;
+    });
+
     document.getElementById("okay-button").addEventListener("click", e => {
         // close the help window when the button is pressed
         helpNodes = document.getElementById("starter-info");
@@ -877,10 +924,6 @@ function setupJSONInput() {
         fixAndLoadJSON(e.target.value);
         e.target.value = "";
     });
-
-    if (query.id) {
-        input.remove();
-    }
 }
 
 // handler to make sure the document changes properly when the window is resized
